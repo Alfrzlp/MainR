@@ -1,0 +1,96 @@
+---
+title: "Forecast"
+author: "Ridson Alfarizal"
+date: "2/10/2021"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, echo=T, warning=F, message=FALSE}
+library(tidyverse)
+library(forecast)
+library(fpp3)
+```
+
+## Read Data
+```{r data}
+jbka <- readxl::read_xlsx("D:/_Datasets/__Time Series/jumlah barang melalui KA jawa.xlsx")
+
+knitr::kable(head(jbka), col.names = c('Waktu', 'Jumlah Barang (Ribu Ton)'))
+```
+
+### Mengubah data ke format `tsibble()`
+```{r}
+jbka <- jbka %>% 
+  mutate(date = yearmonth(date)) %>% 
+  as_tsibble(index = date) 
+
+head(jbka)
+```
+
+## Automaticaly ARIMA
+```{r}
+fit <- jbka %>% 
+  model(ARIMA(log(jb), trace = T)) 
+
+report(fit)
+```
+
+
+
+## Evaluasi Model
+```{r}
+fit %>% 
+  gg_tsresiduals(lag_max = 36)
+```
+
+```{r}
+augment(fit) %>% 
+  features(.innov, ljung_box, lag = 36)
+```
+```{r}
+shapiro.test(augment(fit)$.resid)
+```
+
+```{r}
+knitr::kable(accuracy(fit))
+```
+
+# Forecast
+```{r}
+library(ggrepel)
+
+fc <- fit %>% forecast(h = 3)
+fc %>% 
+  autoplot(jbka[180:187,]) +
+  geom_point(data = fc, aes(x = date, y = .mean)) +
+  geom_text_repel(
+    data = fc,
+    aes(label = round(.mean, 2), y = .mean),
+    nudge_x = 0.05,
+    nudge_y = 0.05
+  ) +
+  labs(
+    title = 'Forecast',
+    x = 'Date', y = 'Jumlah Barang (Ribu Ton)'
+  ) 
+```
+
+```{r}
+fit %>% 
+  forecast(h = 30) %>% 
+  autoplot(jbka[100:187,]) +
+  labs(
+    title = 'Forecast',
+    x = 'Date', y = 'Jumlah Barang (Ribu Ton)'
+  ) 
+```
+
+```{r}
+autoplot(jbka) +
+  geom_line(y = augment(fit)$.fitted, color = 'steelblue')
+```
+

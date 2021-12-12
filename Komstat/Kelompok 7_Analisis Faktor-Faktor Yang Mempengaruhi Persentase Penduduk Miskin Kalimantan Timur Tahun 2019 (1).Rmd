@@ -1,0 +1,161 @@
+---
+title: ANALISIS FAKTOR-FAKTOR YANG MEMPENGARUHI PERSENTASE PENDUDUK MISKIN KALIMANTAN
+  TIMUR TAHUN 2019
+author: Dwi Ayu Andriani_211910732, Lamtutur Sri Paulina Pasaribu_211911015, Ridson
+  Alfarizal_211911057
+date: "24/12/2020"
+output:
+  word_document: default
+  pdf_document: default
+indent: yes
+---
+
+```{r setup, warning=FALSE, include=FALSE,  tidy=T, class="text-justify"}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# **PENDAHULUAN**
+   
+   Kemiskinan merupakan isu sentral bagi setiap negara didunia, khususnya bagi negara berkembang, pengentasan kemiskinan dan menciptakan kesejahteraaan bagi rakyat merupakan tujuan utama suatu negara.Kemiskinan dipandang sebagai ketidakmampuan dari sisi ekonomi untuk memenuhi kebutuhan dasar makanan dan bukan makanan yang diukur dari sisi pengeluaran. Jadi Penduduk Miskin adalah penduduk yang memiliki rata-rata pengeluaran perkapita perbulan dibawah garis kemiskinan. 
+   
+   Kemiskinan juga terjadi di Kalimantan Timur. Persentase penduduk miskin di Kalimantan timur relatif tinggi, walaupun sektor pertambangan telah mampu menyumbang lebih dari 40 persen perekonomian di Kalimantan Timur dan termasuk Provinsi kaya yang memiliki kekayaan alam seperti hutan, perkebunan, perikanan, pertanian, dan pertambangan tetapi tidak berdampak signifikan terhadap kemiskinan di Kalimantan Timur. 
+   
+   Kemiskinan merupakan masalah yang sangat krusial untuk calon ibukota negara ini, tidak hanya karena tendensinya yang semakin meningkat, namun juga konsekuensinya yang tidak hanya meliputi ruang lingkup ekonomi semata namun juga masalah sosial dan instabilitas politik di Kalimantan Timur. Oleh karena itu, pengentasan masalah kemiskinan harus menjadi prioritas utama dalam pembangunan ekonomi, baik jangka pendek maupun jangka panjang. Penyebab kemiskinan memiliki sifat yang sangat kompleks serta berbeda tiap daerah.
+   
+   Berangkat dari permasalahan tersebut penulis ingin melakukan analisis lebih dalam tentang faktor-faktor yang mempengaruhi persentase penduduk miskin di Kalimantan Timur tahun 2019.
+   
+   Faktor-faktor yang mempengaruhi persentase penduduk miskin di Kalimantan Timur tahun 2019 yang akan dianalisis penulis antara lain Tingkat Pengangguran Terbuka(TPT), kepadatan penduduk, jumlah proyek Penanaman Modal Asing(PMA), rata-rata lama sekolah, umur harapan hidup, Rasio Ketergantungan(RK), dan Rasio Jenis Kelamin(RJK).
+   
+   
+  
+```{r message = FALSE, warning = F, echo=F}
+library(readxl)
+library(car)
+library(lmtest)
+```
+
+**Data untuk setiap variabel yang akan digunakan untuk analisis faktor-faktor yang mempengaruhi persentase penduduk miskin di Kalimantan Timur terdapat pada tabel di bawah ini.**
+```{r, tidy=TRUE, echo=F}
+df = read_xlsx("D:/Datasets/kaltim 2019.xlsx")
+knitr::kable(df)
+```
+
+Agar memudahkan dalam proses penulisan syntaks maka nama kolom dibuat lebih sederhana
+```{r}
+colnames(df) <- c("kab", "pp_miskin", "tpt","kep_pddk", "proyek_pma", "rls", "uhh", "hls", "rk", "rjk")
+```
+Ket:
+
+1. kab            = Kabupaten atau kota
+
+2. pp_miskin      = persentase penduduk miskin
+
+3. tpt            = Tingkat Pengangguran Terbuka(TPT)
+
+4. kep_pddk       = kepadatan penduduk
+
+5. proyek_pma     = jumlah proyek PMA
+
+6. rls            = rata-rata lama sekolah
+
+7. uhh            = umur harapan hidup
+
+8. hls            = harapan lama sekolah
+
+9. rk             = rasio ketergantungan
+
+10. rkj           = rasio jenis kelamin
+
+
+# **ANALISIS**
+
+Analisis dari faktor-faktor yang mempengaruhi persentase penduduk miskin di Kalimantan Timur tahun 2019 menggunakan model regresi linier berganda. Regresi linier berganda merupakan model persamaan yang menjelaskan hubungan satu variabel tak bebas/ *response* dengan dua atau lebih variabel bebas/predictor. Tujuan dari uji regresi linier berganda adalah untuk memprediksi nilai variable tak bebas/ *response* apabila nilai-nilai variabel bebasnya/ *predictor*  diketahui. Disamping itu juga untuk dapat mengetahui bagaimanakah arah hubungan variabel tak bebas dengan variabel -variabel bebasnya.
+
+Variable tak bebas/ *response* dalam penelitian ini adalah persentase penduduk miskin di Kalimantan timur 2019. Variabel bebas/ *predictor* dalam penelitian ini yakni antara lain Tingkat Pengangguran Terbuka(TPT), kepadatan penduduk, jumlah proyek Penanaman Modal Asing(PMA), rata-rata lama sekolah, umur harapan hidup, Rasio Ketergantungan(RK), dan Rasio Jenis Kelamin(RJK).
+
+Proses analisis dari faktor-faktor yang mempengaruhi persentase penduduk miskin di Kalimantan Timur tahun 2019 menggunakan model regresi linier berganda akan dipaparkan dibawah ini.
+
+
+# **Stepwise Selection**
+
+  Stepwise Selection ini digunakan untuk mencari model regresi terbaik yang merupakan gabungan dari backward selection dan forward selection
+
+```{r, tidy=TRUE}
+fit = lm(pp_miskin ~ tpt + kep_pddk + proyek_pma + rls + uhh + hls + rk + rjk, data = df)
+
+fit_stepwise = step(fit, direction = "both")
+summary(fit_stepwise)
+```
+
+Terlihat dari hasil stepwise variabel rata-rata lama sekolah, umur harapan hidup, dan rasio jenis kelamin terpilih menjadi variabel dalam model terbaik. Maka dalam analisis dari faktor-faktor yang mempengaruhi persentase penduduk miskin di Kalimantan Timur tahun 2019 dengan model regresi linier berganda akan menggunakan ketiga variabel yang telah terpilih yaitu  rata-rata lama sekolah, umur harapan hidup, dan rasio jenis kelamin.
+
+
+# **Regresi Linier Berganda**
+
+
+```{r, tidy=TRUE}
+model <- lm(pp_miskin ~ rls + uhh + rjk, df)
+
+summary(model)
+```
+Berdasarkan uji kecocokan model atau uji F di atas, bisa dilihat di bagian F statistik dengan nilai 18.33 dan p-value 0.002003 dimana nilai p-value dibandingan dengan nilai signifikasi sehingga dapat diartikan bahwa model regresi diatas sudah sesuai
+
+selain itu didapatkan uji parsial untuk masing masing variabel. Terlihat dari output p value dan uji t nya, semua variabel independent sangat signifikan untuk alpha = 0.1 sehingga bisa dikaitan bahwa variabel rata-rata lama sekolah, umur harapan hidup, dan rasio jenis kelamin secara signifikan berpengaruh terhadap model persentase kemiskinan
+
+koefisien determinasi dari regresi berganda dapat dilihat dari nilai Adjusted R-squared .Dapat dilihat diatas nilai Adjusted R-squared sebesar 0.8525 . Ini berarti variabel rata-rata lama sekolah, umur harapan hidup, dan rasio jenis kelamin berpengaruh terhadap presentase kemiskinan sebesar 85.25% dan sisanya dipengaruhi variabel lain yang belum masuk kedalam model.
+
+
+# **Uji Asumsi Regresi Liniear Berganda**
+
+
+## **Non Liniearitas**
+```{r, tidy=T}
+crPlots(model)
+ceresPlots(model)
+```
+Dapat dilihat dari hasil diatas bahwa data menunjukan pola linear
+
+
+## **Homoskedastisitas**
+```{r, tidy=T}
+ncvTest(model)
+bptest(model)
+```
+Berdasarkan Output diatas bahwa nilai uji ncvTest dan uji Bresuch-Pangan menghasilkan kesimpulan yang sama yaitu gagal tolak Ho, bahwa model regresi yang terbentuk bebas dari asumsi heteroskedastisitas. Atau bisa dikatakan bahwa modelnya memiliki varians yang tetap homoskedastisitas.
+
+
+## **Multikolinearitas**
+```{r, tidy=T}
+vif(model)
+```
+
+Nilai vif masing-masing variable independen nilainya kurang dari 5 artinya dalam model tersebut tidak terdapat pelanggaran asumsi terkait Multikolinearitas.
+
+
+## **Normalitas**
+```{r, tidy=T}
+outlierTest(model)
+qqPlot(model, main = "QQ Plot")
+ks.test(model$residuals, "pnorm")
+```
+karena p-value > alpha maka Gagal Tolak Ho dan dapat dikatakann bahwa nilai residual berdistribusi normal.
+
+
+# **Kesimpulan**
+
+   Berdasarkan analisis regresi linear berganda yang dilakukan, dari 8 variabel yang dimasukkan ke dalam model, terdapat 3 variabel yang memiliki pengaruh paling besar (85,25%) terhadap persentase penduduk miskin di 10 kabupaten di Provinsi Kalimantan Timur, yaitu rata-rata lama sekolah, umur harapan hidup, dan rasio jenis kelamin. Sedangkan 14,75% dipengaruhi oleh variabel lainnya yang belum masuk ke dalam model.
+   
+Persamaan regresi linearnya adalah sebagai berikut :
+
+pp_miskin = -111.6523 + -3.4484rls + 1.7221uhh + 0.2237rjk + e
+
+Sehingga dapat disimpulkan bahwa setiap penambahan 1% rata-rata lama sekolah akan mengurangi presentase penduduk miskin sebesar 3,4484%, penambahan 1% umur harapan hidup akan menambah presentase penduduk miskin sebesar 1,7221%, dan penambahan 1% rasio jenis kelamin akan menambah presentase penduduk miskin sebesar 0,2237%.
+
+
+# **Referensi**
+
+Badan Pusat Statistik Provinsi Kalimantan Timur. *kaltim.bps.go.id*. (diakses 24 Desember 2020)
+
+Pramana, Setia dkk. 2019. *Dasar-Dasar Statistika Dengan Software R Konsep dan Aplikasi*. Jakarta:Inmedia.
+
+Pratama, Yoghi Citra. 2014. *Analisis Faktor-faktor yang Mempengaruhi Kemiskinan di Indonesia* . Jurnal Bisnis dan Manajemen.4(2):210-223.

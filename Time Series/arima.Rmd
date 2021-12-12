@@ -1,0 +1,155 @@
+---
+title: "ARIMA"
+author: "Ridson Alfarizal"
+date: "23/9/2021"
+output:
+  word_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, echo=T, warning=F, message=FALSE}
+library(tidyverse)
+library(forecast)
+library(lmtest)
+```
+
+```{r data}
+jbka <- readxl::read_xlsx("D:/_Datasets/__Time Series/jumlah barang melalui KA jawa.xlsx")
+jb <- jbka$jb
+
+knitr::kable(head(jbka), col.names = c('Waktu', 'Jumlah Barang (Ribu Ton)'))
+```
+
+# Tentative Identification (5 model)
+
+```{r, fig.height=5, fig.width=9}
+ggtsdisplay(jb, lag.max = 36)
+```
+
+
+```{r}
+diff(jb, 1) %>% ggtsdisplay(main = "First Difference", lag.max = 36)
+```
+
+Pola ACF seperti ada tiang pancang pada lag = 1, Sedangkan pada pola PACF seperti menurun secara exponensial. Oleh karena itu kemungkinan besar modelnya adalah ARIMA(0, 1, q)
+
+Setelah itu didapatkan beberapa kandidat model yaitu :
+
+- ARIMA(0, 1, 1)
+- ARIMA(0, 1, 2)
+- ARIMA(1, 1, 1)
+- ARIMA(1, 1, 2)
+- ARIMA(1, 1, 3)
+
+## ARIMA(0, 1, 1)
+```{r}
+(model1 <- Arima(jb, order = c(0, 1, 1)))
+
+coeftest(model1)
+```
+pada model ARIMA(0, 1, 1) menunjukkan ma1 signifikan
+
+
+## ARIMA(0, 1, 2)
+```{r}
+(model2 <- Arima(jb, order = c(0, 1, 2)))
+
+coeftest(model2)
+```
+pada model ARIMA(0, 1, 2) hanya menunjukkan ma1 yang signifikan
+
+## ARIMA(1, 1, 1)
+```{r}
+(model3 <- Arima(jb, order = c(1, 1, 1)))
+
+coeftest(model3)
+```
+pada model ARIMA(1, 1, 1) menunjukkan hanya ma1 yang signifikan
+
+## ARIMA(1, 1, 2)
+```{r}
+(model4 <- Arima(jb, order = c(1, 1, 2)))
+
+coeftest(model4)
+```
+model ARIMA(1, 1, 2) menunjukkan tidak ada yang signifikan
+
+## ARIMA(1, 1, 3)
+```{r}
+(model5 <- Arima(jb, order = c(1, 1, 3)))
+
+coeftest(model5)
+```
+model ARIMA(1, 1, 3) menunjukkan tidak ada yang signifikan
+
+
+```{r include=FALSE}
+model <- list(
+  c(0, 1, 1),
+  c(0, 1, 2),
+  c(0, 1, 3),
+  c(1, 1, 1),
+  c(1, 1, 2)
+)
+
+hasil <- 
+  model %>% 
+  sapply(
+    function(x){
+      fit = Arima(jb, order = x)
+      x = summary(fit)
+      return(
+        c(fit$aic, fit$aicc, fit$bic, x[5])
+      )
+    }
+  ) %>% 
+  t() %>% 
+  as.data.frame() %>% 
+  `colnames<-`(c('AIC','AICc', 'BIC', 'MAPE')) %>% 
+  mutate(
+    model = c(
+      'ARIMA(0, 1, 1)',
+      'ARIMA(0, 1, 2)',
+      'ARIMA(1, 1, 1)',
+      'ARIMA(1, 1, 2)',
+      'ARIMA(1, 1, 1)'),
+    .before = AIC
+    )
+```
+# Fungsi `auto.arima()`
+Selanjunya dengan fungsi auto.arima() untuk mencari model terbaik
+
+Dari hasil fungsi `auto.arima()` didapatkan juga model terbaik adalah ARIMA(0, 1, 1). 
+
+```{r}
+auto.arima(log(jb)) %>% 
+  forecast(3) %>% 
+  autoplot()
+```
+
+## Ringkasan
+
+```{r}
+knitr::kable(hasil, align = 'l')
+```
+pada ARIMA model koreksi AIC dapat ditulis dengan AICc
+
+Dari hasil diatas dapat dilihat bahwa nilai AIC, AICc, BIC untuk model ARIMA(0, 1, 1) merupakan yang paling kecil. sehingga ARIMA(0, 1, 1) merupakan model terbaik untuk sementara ini
+
+
+# Evaluasi Model
+
+```{r}
+checkresiduals(model1)
+```
+
+Dari hasil test Ljung-Box menunjukkan bahwa Gagal Tolak Ho. yang artinya residual bersifat random (white noise). hal ini menunjukkan bahwa model baik.
+
+
+## Kesimpulan
+
+Model ARIMA(0, 1, 1) merupakan model arima terbaik pada kasus ini

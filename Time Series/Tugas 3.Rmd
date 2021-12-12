@@ -1,0 +1,231 @@
+---
+title: "Uji Stasioneritas Data"
+author: "Ridson Alfarizal"
+date: "17/9/2021"
+output:
+  word_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, echo=T, warning=F, message=FALSE}
+library(tidyverse)
+```
+
+## Import Data
+
+```{r cars}
+jbka <- readxl::read_xlsx("D:/_Datasets/__Time Series/jumlah barang melalui KA jawa.xlsx")
+jb <- jbka$jb
+
+head(jbka)
+```
+
+# Grafik
+
+```{r pressure, echo=FALSE, fig.height=4.5, fig.width=10}
+library(hrbrthemes)
+windowsFonts('Fira Code' = windowsFont('FiraCode-Regular'))
+
+autoplot(jbka) +
+  geom_line(
+    lwd = 1.1
+  ) +
+  geom_line(
+    aes(y = augment(fit)$.fitted),
+    color = 'palegreen', 
+    lwd = 1.1
+  ) +
+  labs(
+    x = NULL, y = "Ribu (Ton)",
+    title = "Jumlah Barang Melalui Transportasi Kereta Api Pulau Jawa",
+    subtitle = "Januari 2006 - Juli 2021",
+    caption = expression(italic("Sumber : bps.go.id"))
+  ) +
+  expand_limits(y = 0) +
+  coord_cartesian(clip = "off") +
+  hrbrthemes::theme_ft_rc(
+    base_family = "Fira Code",
+    base_size = 13,
+    grid = "XY",
+    ticks = T
+  ) +
+  theme(
+    plot.caption = element_text(size = 12),
+    legend.justification = "top",
+    plot.title.position = "plot",
+    panel.spacing.x = unit(2, "lines"),
+    text = element_text(colour = "gray100", family = "Fira Code"),
+    plot.title = element_text(family = "Fira Code", face = "bold",
+                              colour = "white", size = rel(1.5)),
+    plot.subtitle = element_text(family = "Fira Code",
+                                 colour = "white", size = rel(1.25)),
+    axis.title.y = element_text(hjust = 1, colour = "gray100"),
+    axis.line = element_line(colour = "gray50"),
+    axis.ticks = element_line(colour = 'gray50'),
+    plot.margin = margin(15, 15, 15, 15), # ats kanan bawah kiri
+    axis.text = element_text(colour = "gray100")
+  ) 
+```
+
+Dari grafik diatas sangat jelas bahwa data tidak stasioner baik dari sisi rata-rata maupun varians.
+
+# Correlogram
+```{r, warning=F, message=FALSE}
+library(forecast)
+library(cowplot)
+```
+
+## Autocorrelation Function (ACF)
+```{r, fig.height=5, fig.width=9}
+acf <- ggAcf(jb)
+pacf <- ggPacf(jb)
+
+plot_grid(acf, pacf)
+```
+Dari plot ACF diatas dapat dilihat bahwa menurun lambat menuju 0 dan juga banyak yang melewati garis bartlet. sehingga data tidak stasioner.
+
+
+## Box-Pierce test
+
+```{r}
+Box.test(jb, type = "Box-Pierce")
+```
+
+## Ljung-Box test
+
+Powerful untuk sample kecil
+```{r}
+Box.test(jb, type = "Ljung-Box", lag = 3)
+```
+
+
+
+# Unit Root Test
+
+```{r, warning=F, message=FALSE}
+library(urca)
+library(tseries)
+```
+
+### Augmented Dicky-Fuller
+
+Ho : Proses tidak stasioner
+H1 : Proses stasioner
+
+```{r}
+adf.test(jb)
+```
+```{r}
+ur.df(jb, type = "none") %>% summary
+# ur.df(jb, type = "drift") %>% summary
+# ur.df(jb, type = "trend") %>% summary
+```
+
+
+### Phillips-Perron Test
+
+Ho : Data tidak stasioner
+H1 : Data stasioner
+
+```{r}
+ur.pp(jb, model = 'constant', type = 'Z-tau') %>% summary
+```
+Dari hasil diatas didapatkan bahwa nilai Z-tau = -2.199 > -2.877062 maka Gagal Tolak Ho. Data tidak stasioner
+
+### KPSS test
+
+H0 : Trend deterministik
+H1 : Trend Stokastik
+
+```{r}
+kpss.test(jb, null = 'Trend')
+```
+H0 : Proses stasioner
+H1 : Proses Non stasioner
+
+```{r}
+kpss.test(jb, null = 'Level')
+```
+
+# Dengan Turunan
+
+```{r, echo=FALSE, fig.height=4.5, fig.width=10}
+jbka %>% 
+  mutate(jb = c(NA, diff(jb))) %>% 
+  ggplot(aes(x = date, y = jb)) +
+  geom_line(lwd = 1.5, colour = "palegreen") +
+  labs(
+    x = NULL, y = "Ribu (Ton)",
+    title = "Jumlah Barang Melalui Transportasi Kereta Api Pulau Jawa",
+    subtitle = "Januari 2006 - Juli 2021",
+    caption = expression(italic("Sumber : bps.go.id"))
+  ) +
+  expand_limits(y = 0) +
+  coord_cartesian(clip = "off") +
+  hrbrthemes::theme_ft_rc(
+    base_family = "Fira Code",
+    base_size = 13,
+    grid = "XY",
+    ticks = T
+  ) +
+  theme(
+    plot.caption = element_text(size = 12),
+    legend.justification = "top",
+    plot.title.position = "plot",
+    panel.spacing.x = unit(2, "lines"),
+    text = element_text(colour = "gray100", family = "Fira Code"),
+    plot.title = element_text(family = "Fira Code", face = "bold",
+                              colour = "white", size = rel(1.5)),
+    plot.subtitle = element_text(family = "Fira Code",
+                                 colour = "white", size = rel(1.25)),
+    axis.title.y = element_text(hjust = 1, colour = "gray100"),
+    axis.line = element_line(colour = "gray50"),
+    axis.ticks = element_line(colour = 'gray50'),
+    plot.margin = margin(15, 15, 15, 15), # ats kanan bawah kiri
+    axis.text = element_text(colour = "gray100")
+  ) 
+```
+```{r, fig.height=5, fig.width=9}
+jb_diff <- diff(jbka$jb)
+
+acf <- ggAcf(jb_diff) 
+pacf <- ggPacf(jb_diff) 
+
+plot_grid(acf, pacf)
+```
+
+### Box-Pierce test
+
+```{r}
+Box.test(jb_diff, type = "Box-Pierce")
+```
+
+### Ljung-Box test
+```{r}
+Box.test(jb_diff, type = "Ljung-Box")
+```
+
+### Augmented Dicky-Fuller
+
+```{r}
+adf.test(jb_diff)
+```
+```{r}
+ur.df(jb_diff) %>% summary
+```
+
+### Philips perron test
+```{r}
+ur.pp(jb_diff, model = 'constant', type = 'Z-tau') %>% summary
+```
+Dari hasil diatas didapatkan bahwa nilai Z-tau = -24.9847  < -2.877062 maka Tolak Ho. Data stasioner
+
+### Kpss Test
+```{r}
+kpss.test(jb_diff, null = 'Level')
+```
+

@@ -1,0 +1,56 @@
+dataku <- 
+  readxl::read_xlsx('D:/__SEMESTER 5/Metode Penelitian/data.xlsx') %>% 
+  # Ganti nama kolom lebih simpel
+  `colnames<-`(c('kab', 'jk', 'tk', 'rb', 'kp')) %>% 
+  type_convert() %>% 
+  drop_na()
+
+head(dataku)
+
+# Multikolinearitas -------------------------------------------------------
+car::vif(lm(jk ~ tk + rb + kp, data = dataku))
+
+
+
+# Poisson Regression ------------------------------------------------------
+# Poisson Model
+pm <- glm(jk ~ tk + rb + kp, data = dataku, family = 'poisson')
+summary(pm)
+
+lmtest::lrtest(pm)
+
+
+
+# Cek equidispersi --------------------------------------------------------
+# jika deviance(pm)/df.residual(pm) > 1 maka overdispersi
+deviance(pm)/df.residual(pm)
+
+# Alternatif uji lain
+# H1 : rasio dispersi > 1 (mengalami overdispersi)
+AER::dispersiontest(pm)
+
+
+# Negative Binomial Regression --------------------------------------------
+library(MASS)
+
+nbm <- glm.nb(jk ~ rb + kp + tk, data = dataku)
+summary(nbm)
+
+
+# Generalized Poisson Regression ------------------------------------------
+library(VGAM)
+
+gpm <- vglm(jk ~ tk + rb + kp, genpoisson2, data = dataku, trace = TRUE, model = T)
+summary(gpm)
+
+pchisq(-2*-225.5378, 61, lower.tail = F)
+
+# Uji simultan ------------------------------------------------------------
+library(lmtest)
+
+# lmtest::lrtest Artinya fungsi lrtest dari package lmtest
+lmtest::lrtest(pm)
+lmtest::lrtest(nbm)
+
+lrtest_vglm(gpm)
+

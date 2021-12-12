@@ -1,0 +1,20 @@
+---
+title: "Responsi"
+author: "Ridson Alfarizal"
+date: "8/12/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+kode dijalankan dan dimasukkan ke outputs
+```{r, eval=T}
+print("Hello world")
+```
+
+```{r}
+library(marmap)
+```
+

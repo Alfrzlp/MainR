@@ -1,0 +1,280 @@
+---
+title: "Pembahasan Soal 2018/2019"
+author: "Tim Modul"
+date: "29/12/2020"
+output: 
+      md_document:
+            variant: markdown_github
+---
+
+
+# Load Library
+```{r message=FALSE, warning=FALSE}
+library(datasets)
+library(knitr)
+```
+
+# Nomor 1 
+Gunakanlah dataset dari R “OrchardSprays”. Data tersebut berasal dari sebuah studi yang ingin mengetahui pengaruh dari beberapa perlakuan (treatment) terhadap pengurangan jumlah lebah (decrease) yang mendekati sebuah kebun buah.
+Dengan mengasumsikan bahwa variabel pengurangan jumlah lebah (decrease) untuk tiap kategorik treatment memiliki varians yang sama dan berdistribusi normal, kerjakanlah hal-hal berikut (dengan menggunakan taraf uji 5%):
+
+a. Ujilah apakah rata-rata pengurangan jumlah lebah dari treatment A lebih kecil 2.8 dibandingkan rata-rata decrease dari treatment B.
+b. Ujilah apakah treatment C,D,F, dan H memberikan pengaruh yang berbeda terhadap besarnya pengurangan jumlah lebah? Lakukan analisis lanjutan jika diperlukan.
+
+## Ekspolorasi Data
+
+```{r}
+df <- OrchardSprays
+kable(head(df))
+```
+
+```{r}
+str(df)
+```
+Dataset terdiri dari 4 variabel. Level pada variabel treatment sebanyak 8. Level A menunjukkan perlakuan dengan kadar sulfur tertinggi, level B menunjukkan perlakuan dengan kadar sulfur tinggi, begitu seterusnya hingga level H yang menunjukkan perlakuan dengan tidak diberi kadar sulfur.
+
+## Bagian  A : T-test
+
+Ujilah apakah rata-rata pengurangan jumlah lebah dari treatment A lebih kecil 2.8 dibandingkan rata-rata decrease dari treatment B.
+
+Populasi A merupakan populasi dengan treatment jenis A, dan populasi B merupakan populasi dengan treatment jenis B.
+
+```{r}
+popA <- df[df$treatment == "A",]
+kable(popA)
+```
+
+```{r}
+popB <- df[df$treatment == "B",]
+kable(popB)
+```
+
+Dengan mengasumsikan bahwa variabel pengurangan jumlah lebah (decrease) untuk tiap kategori treatment memiliki varians yang sama dan berdistribusi normal, maka digunakan T-test untuk Untuk mengetahui apakah terdapat perbedaan rata-rata pengurangan jumlah lebah dari treatment A dan B.
+
+Dengan hipotesis :
+
+- H0 : mean A dan mean B sama 
+- H1 : mean A - mean B < 2.8
+
+```{r}
+t.test(popA$decrease, popB$decrease, alternative = "less", mu = 2.8, var.equal = TRUE)
+```
+
+
+Didapatkan p-value sebesar 0.0015, di mana angka itu lebih kecil dari alpha(0.05). Sehingga keputusan tolak H0. Dengan tingkat signifikansi 5%, terdapat cukup bukti untuk menyatakan bahwa perbedaan rata-rata pengurangan jumlah lebah treatment A dengan treatment B lebih kecil dari 2.8.
+
+
+## Bagian b : ANOVA 
+
+Ujilah apakah treatment C,D,F, dan H memberikan pengaruh yang berbeda terhadap besarnya pengurangan jumlah lebah? Lakukan analisis lanjutan jika diperlukan.
+
+Dengan mengasumsikan bahwa variabel pengurangan jumlah lebah (decrease) untuk tiap kategori treatment memiliki varians yang sama dan berdistribusi normal, maka digunakan ANOVA untuk mengetahui apakah terdapat pengaruh yang berbeda terhadap besarnya pengurangan jumlah lebah dengan cara melihat perbedaan rata-rata pengurangan jumlah lebah pada treatment C, D, F, dan H.
+
+### Filter Data
+
+```{r}
+popcdfh <- dplyr::filter(df, treatment %in% c("C", "D", "F", "H"))
+kable(popcdfh)
+```
+
+### Buat Model Anova
+
+- H0 : Tidak ada perbedaan rata-rata antara treatment
+- H1 : Terdapat minimal satu rata-rata yang berbeda
+
+```{r}
+res.anova <- aov(decrease ~ treatment, data = popcdfh)
+summary(res.anova)
+```
+Berdasarkan hasil yang diperoleh, didapatkan p-value sebesar 0.000, yang berarti lebih kecil dari alpha(0.05) sehingga keputusan yang diambil ialah tolak H0. Dengan tingkat signifikansi 5%, terdapat cukup bukti untuk menyatakan bahwa terdapat perbedaan rata-rata pengurangan jumlah lebah pada treatment C, D, F, dan H.
+
+
+### Posthoc Test
+
+Untuk melihat treatment mana yang memiliki rata-rata yang berbeda, dapat digunakan uji Tukey. Dengan hipotesis :
+
+- H0 : kedua treatment memiliki rata-rata sama
+- H1 : kedua treatment memiliki rata-rata berbeda
+
+```{r}
+TukeyHSD(res.anova)
+```
+Berdasarkan hasil yang diperoleh, terlihat bahwa hanya p-value untuk C-D dan F-H yang memberikan angka lebih dari alpha(0.05). Itu artinya sulfur pada treatment C dan D yang memiliki kadar yang tidak berbeda signifikan memberikan pengaruh yang sama. Begitu juga dengan treatment F dan H yang memiliki kadar sulfur yang tidak berbeda secara signifikan juga memberikan pengaruh yang sama.
+
+
+# Nomor 2
+Buat fungsi untuk menghitung estimasi Bootstrap dan Jecknife dari korelasi beserta 90% Confidence Intervalnya. Gunakan fungsi tersebut pada data mtcars untuk mendapatkan nilai estimasi korelasi antara variabel mile per gallon (mpg) dan horse power (hp).
+
+## Load Data
+Seperti Orchard Sprays, datasets mtcars juga tersedia pada package datasets.
+```{r}
+car <- mtcars
+kable(dplyr::sample_n(car, 7))
+```
+
+## Cek Normalitas
+
+Sebelumnya, untuk mengetahui metode korelasi apa yang akan digunakan, dilakukan uji shapiro wilk terlebih dahulu untuk mengetahui apakah kedua variabel berdistribusi normal.
+
+```{r}
+shapiro.test(car$mpg)
+```
+
+```{r}
+shapiro.test(car$hp)
+```
+Terlihat bahwa variabel `horse` power tidak memenuhi asumsi kenormalan. Maka disini akan digunakan metode korelasi rank spearman.
+
+
+## Bootstrap
+
+Langkah-langkah :
+
+- Melakukan resample sejumlah n buah sebanyak 1000 kali
+- Menghitung korelasi spearman untuk tiap iterasi
+- Mencari rata-rata estimasi korelasi dari hasil estimasi tiap resampling
+
+```{r}
+boot <- NULL
+iter <-  1000
+for (i in 1:iter) {
+      my_sample <- dplyr::sample_n(car, size = nrow(car), replace = TRUE)
+      boot[i] <- cor(my_sample$mpg, my_sample$hp, method = "spearman")
+}
+
+cor.boot <- mean(boot)
+cor.boot
+```
+
+Hasil yang didapatkan tidak berbeda jauh dengan hasil estimasi yang dilakukan tradisional : 
+
+```{r}
+cor(car$mpg, car$hp, method = "spearman")
+```
+
+### Membuat Confident Interval
+
+Untuk menentukan confident interval terdapat beberapa metode, silahkan baca [disini](https://towardsdatascience.com/bootstrapping-confidence-intervals-the-basics-b4f28156a8da)
+
+Akan digunakan metode quantile, yaitu 0.1 dan 0.9 (sesuai tingkat kepercayaan yang ditentukan = 90%). 
+```{r}
+ci <- quantile(boot, c(0.1, 0.9))
+ci
+```
+### Visualisasi
+```{r}
+hist(boot)
+```
+
+## Jecknife
+
+Langkah-langkah :
+
+- Melakukan resample sejumlah n-1 buah sebanyak n kali, setiap iterasi ke-i akan menghilangkan data ke-i
+- Menghitung korelasi spearman disetiap iterasi
+- Mencari rata-rata estimasi korelasi dari hasil estimasi tiap resampling
+
+```{r}
+jeck <- NULL
+for (i in 1:nrow(car)) {
+      my_sample <- car[-i, ]
+      jeck[i] <- cor(my_sample$mpg, my_sample$hp, method = "spearman")
+}
+
+cor.jeck <- mean(jeck)
+cor.jeck
+```
+Hasil yang didapatkan tidak berbeda jauh dengan hasil estimasi yang dilakukan tradisional (sesuai perhitungan sebelumnya, koef. korelasi sebesar -0.8946646) 
+
+### Membuat Confident Interval
+Akan digunakan metode quantile, yaitu 0.1 dan 0.9 (sesuai tingkat kepercayaan yang ditentukan = 90%). 
+```{r}
+ci_jeck <- quantile(jeck, c(0.1, 0.9))
+ci_jeck
+```
+
+### Visualisasi
+```{r}
+hist(jeck)
+```
+
+# Nomor 3
+
+Sebuah lembaga penelitian melakukan survei ke Rumah Tangga (ruta) pertanian di sebuah kabupaten di Pulau Jawa yang hasilnya dapat ditampilkan pada tabel di bawah ini.
+Berdasarkan tabel jumlah rumah tangga berdasarkan status kemiskinan multidimensi, status pekerjaan KRT, Lapangan Usaha sumber pendapatan dan Kuintil Pendapatan, sesunlah data tabulasi menjadi sebuah data frame (cantumkan syntaxnya), yang nantinya akan memudahkan analisis lebih lanjut. Setelah dibuat data framenya, lakukan pengujian dengan tingkat signifikansinya 5%.
+
+a. Bagaimana proporsi Rumah Tangga dengan Status Kemiskinan multidimensinya . apakah berbeda-beda atau tidak. Jelaskan secara inferensia
+b. Apakah ada perbedaan proporsi ruta berdasarkan kategori kuintil pendapatan?
+Berikut susunan data rumah tangga berdasarkan status kemiskinan multidimensi (TM, M), status pekerjaan (BP, P), sumber pendapatan utama (BukanPert, Pert, Lain), serta kuintil pendapatannya.
+
+
+## Membuat Data
+```{r}
+data.ruta <- matrix(c(100, 434, 79,
+                    151, 0, 0,
+                    71, 10, 0,
+                    3776, 7335, 2088,
+                    5070, 2726, 1253,
+                    2901, 224, 19,
+                    85, 73, 51,
+                    0, 30, 0,
+                    35, 0, 0,
+                    270, 326, 194,
+                    266, 502, 164,
+                    339, 0, 0),
+                  ncol = 3,
+                  byrow = TRUE,
+                  dimnames = list(" " = c("TMBPBukanPert", "TMBPPert", "TMBPLain", "TMPBukanPert", "TMPPert", "TMPLain", "MBPBukanPert", "MBPPert", "MBPLain", "MPBukanPert", "MPPert", "MPLain"),
+                                  "Kuintil Pendapatan" = c("40% Terbawah", "40% Menengah", "20% Teratas")))
+kable(data.ruta)
+```
+
+## Bagian A
+
+### Filter Data
+```{r}
+stat.kem <- matrix(c(sum(rowSums(data.ruta[1:6,])),
+                     sum(rowSums(data.ruta[7:12,]))),
+                   dimnames = list("Status Kemiskinan" = c("Miskin", "Tidak Miskin"),
+                                     "Jumlah"))
+kable(stat.kem)
+```
+
+### Uji Proporsi
+
+- H0 : proporsi miskin dan tidak miskin sama
+- H1 : proporsi miskin dan tidak miskin berbeda
+```{r}
+chisq.test(stat.kem)
+```
+
+Berdasarkan hasil yang diperoleh, terlihat bahwa p-value lebih kecil dari alpha(0.05) sehingga keputusan tolak H0. Maka dengan tingkat signifikansi 5%, terdapat cukup bukti untuk menyatakan bahwa terdapat perbedaan proporsi rumah tangga berdasarkan status kemiskinan multidimensinya. Ini berarti terdapat kesenjangan yang signifikan antara jumlah rumah tangga miskin dengan tidak miskin.
+
+
+### Alternatif Syntax
+- H0 : proporsi miskin = 0.5
+- H1 : Proporsi miskin != 0.5
+
+Kita cukup menguji apakah proporsi yang miskin sama dengan 0.5. Jika tidak, yang berarti tolak H0, itu sudah menunjukkan bahwa proporsi antara miskin dan tidak miskin berbeda
+```{r}
+prop.test(stat.kem[1], sum(stat.kem), p = 0.5, correct = FALSE)
+```
+
+## Bagian B
+
+### Filter Data
+```{r}
+kui.pen <- matrix(c(colSums(data.ruta)),
+                   dimnames = list("Kuintil Pendapatan" = c("40% Terbawah", "40% Menengah", "20% Teratas"),
+                                    "Jumlah"))
+kable(kui.pen)
+```
+
+### Uji Proporsi
+- H0 : Tidak terdapat perbedaan proporsi rumah tangga berdasarkan kuintil pendapatannya
+- H1 : Terdapat perbedaan proporsi rumah tangga berdasarkan kuintil pendapatannya
+
+```{r}
+chisq.test(kui.pen)
+```
+Berdasarkan hasil yang diperoleh, terlihat bahwa p-value lebih kecil dari alpha(0.05) sehingga keputusan tolak H0. Maka dengan tingkat signifikansi 5%, terdapat cukup bukti untuk menyatakan bahwa terdapat perbedaan proporsi rumah tangga berdasarkan kuintil pendapatannya. 

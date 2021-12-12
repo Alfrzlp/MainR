@@ -1,0 +1,128 @@
+---
+title: "Responsi"
+author: "Ridson Alfarizal"
+date: "8/12/2020"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+2. Dengan menggunakan data: http://www.r-exercises.com/wpcontent/uploads/2016/10/cancer-survival.csv Bagaimana rata-rata survival-nya dari masing-masing Organ yang terkena kanker? (Lakukan uji asumsinya) dan dijika hasilnya ternyata ada yang berbeda rata-ratanya, manakah yang berbeda? Lakukan ujinya dengan tingkat signifikansi 5%. Interpretasikan hasilnya! (Tulis Syntax dan Uji Hipotesisnya)
+
+**Masukkan data **
+```{r}
+cancer = read.csv("D:/Datasets/cancer-survival.csv")
+head(cancer)
+```
+
+**Uji Normalitas**
+```{r}
+by(data = cancer$Survival, INDICES = cancer$Organ, FUN = shapiro.test)
+```
+
+**Uji Asumsi Homogenitas Varians**
+```{r}
+bartlett.test(Survival~Organ, data = cancer)
+```
+
+**Uji Anova**
+```{r}
+anova1 = aov(Survival~Organ, data = cancer)
+summary(anova1)
+```
+
+**Uji Tukey**
+untuk mengetahui rata-rata mana yang berbeda signifikan
+```{r}
+TukeyHSD(anova1)
+```
+
+
+
+3. Dengan data “car” data set “Vocab”
+- a. Peneliti berpendapat bahwa rata-rata nilai male dan female tidak berbeda secara signifikan untuk nilai Vocab-nya. Gunakan alpha 5% untuk menguji kebenaran pendapat dari peneliti tersebut. (Tulis Syntax dan Uji Hipotesisnya)
+
+#### 3A
+**Masukkan data **
+```{r}
+library(car)
+data("Vocab")
+head(Vocab)
+```
+
+**Uji Normalitas**
+```{r}
+library(dplyr)
+male = Vocab %>% filter(sex == "Male") %>% 
+  select(vocabulary) %>% pull()
+female = Vocab %>% filter(sex == "Female") %>% 
+  select(vocabulary) %>% pull()
+
+nortest::lillie.test(male)
+nortest::lillie.test(female)
+```
+
+**Uji Asumsi Homogenitas Varians**
+```{r}
+bartlett.test(vocabulary~sex, data = Vocab)
+```
+
+**Uji t**
+```{r}
+t.test(vocabulary~sex, data = Vocab, var.equal = F)
+```
+
+#### 3B
+- b. Jika ada pernyataan bahwa rata-rata nilai dari male adalah 6. Ujilah hipotesis tersebut dengan alpha 5%. (Tulis Syntax dan Uji Hipotesisnya)
+```{r}
+t.test(male, mu=6)
+```
+
+
+
+4. Tabel berikut menunjukkan data produksi 3 varietas gandum (dalam ton/ha) dengan 4 jenis perlakuan pupuk. Ujilah h0’, pada taraf nyata 0.05 bahwa tidak ada beda rata-rata hasil gandum untuk ke-4 perlakuan pupuk tsb. Juga ujilah h0”, bahwa tidak ada beda rata-rata hasil untuk ke-3 varietas gandum tersebut. (Tulis Syntax dan Uji Hipotesisnya)
+
+![](D:/tabel games anova.jpg)
+
+**Masukkan data **
+```{r}
+v1 = c(64, 55, 59, 58)
+v2 = c(72, 57, 66, 57)
+v3 = c(74, 47, 58, 53)
+
+panen = data.frame(v1, v2, v3)
+panen
+```
+
+**Memperbaiki struktur data**
+```{r}
+library(tidyr)
+panen = panen %>% 
+  mutate(pupuk = c("p1", "p2", "p3", "p4"), .before = v1) %>% 
+  pivot_longer(2:4, names_to = "varietas", values_to = "hasil")
+panen
+```
+
+**Uji Normalitas**
+```{r}
+by(data = panen$hasil, INDICES = panen$varietas, FUN = shapiro.test)
+by(data = panen$hasil, INDICES = panen$pupuk, FUN = shapiro.test)
+```
+
+**Uji Asumsi Homogenitas Varians**
+```{r}
+bartlett.test(hasil~varietas, data = panen)
+bartlett.test(hasil~pupuk, data = panen)
+```
+
+**Uji Anova**
+```{r}
+anova4 = aov(hasil~varietas + pupuk, data = panen)
+summary(anova4)
+```
+
+$\alpha$

@@ -1,0 +1,410 @@
+---
+title: "Pembahasan Tahun 2019/2020"
+author: "Tim Modul"
+date: "12/29/2020"
+output: html_document
+---
+
+# Load Library
+```{r message=FALSE, warning=FALSE}
+library(ggplot2)
+library(dplyr)
+library(knitr)
+library(nycflights13)
+library(reshape2)
+```
+
+# Nomor 1
+Dari library(nycflights13), gunakan dataset flights, airports, airlines, planes, dan weather.
+
+## Integrasi Data
+
+### Data Flight
+```{r}
+data <-  flights
+kable(sample_n(data, 10))
+```
+
+### Join Data Airlines
+Untuk mengambil nama airlines
+```{r}
+kable(head(airlines, 5))
+```
+
+
+```{r}
+data <- left_join(data, airlines, by = "carrier")
+kable(head(data, 10))
+```
+
+### Join Data Planes
+Untuk mengambil tahun pembuatan pesawat
+```{r}
+tmp <- planes %>%
+      select(tailnum, year) %>%
+      rename(year_manufacture = year)
+
+data <- left_join(data, tmp, by = "tailnum")
+kable(head(data, 10))
+```
+
+## Bagian A
+
+Buat bar-chart untuk urutan 10 maskapai penerbangan airlines (lengkap dengan nama maskapainya) dengan rata-rata waktu keterlambatan keberangkatan (departure delay) paling lama
+
+Variabel `dep_delay` mengandung nilai positif dan negatif. Nilai negatif artinya bahwa pesawat berangkat lebih cepat dari jadwal keberangkatan, sedangan jika nilainya positif pesawat lebih lambat dari jadwal keberangkatan. Pada bar-chart yang akan dibuat, saya menggunakan keduanya akan tetapi untuk nilai yang negatif saya mutlakkan terlebih dahulu, agar tidak mempengaruhi rata-rata yang dibuat, karena menurut saya keberangkatan yang lebih cepat juga tidak baik.
+
+`Ket : ini tergantung kalian, mau tetap menggunakan nilai yang negatif atau tidak.`
+```{r message=FALSE, warning=FALSE}
+data %>%
+      mutate(dep_delay = abs(dep_delay)) %>%
+      group_by(name) %>%
+      summarise(mean_delay = mean(dep_delay, na.rm = TRUE)) %>%
+      top_n(10) %>%
+      ggplot(aes(x = mean_delay, y = reorder(name, mean_delay))) +
+      geom_col(fill = "steelblue") +
+      labs(x = "Rata-Rata Delay (Menit)",
+           y = "",
+           title = "10 Maskapai dengan Rata-Rata\nKeterlambatan Keberangkatan Terlama",
+           caption = "Sumber Data : nycflights13") +
+      scale_x_continuous(expand = c(0, 0), limit = c(0, 29)) +
+      geom_text(aes(label = round(mean_delay, 2)), size = 3, hjust = -0.3) +
+      theme_minimal() +
+      theme(plot.title = element_text(hjust = 0.5, size = 15),
+            axis.text.x = element_blank(),
+            plot.margin = margin(20, 10, 20, 0))
+```
+
+## Bagian B
+
+Uji apakah terdapat beda rata-rata jarak yang ditempuh dari pesawat yang dibuat sebelum tahun 2000 dan setelah (termasuk) tahun 2000
+
+### Split Data
+```{r}
+sebelum2000 <- data %>%
+      filter(year_manufacture < 2000) %>%
+      select(distance)
+sebelum2000 <- sebelum2000$distance
+mean(sebelum2000)
+```
+```{r}
+sesudah2000 <- data %>%
+      filter(year_manufacture >= 2000) %>%
+      select(distance)
+sesudah2000 <- sesudah2000$distance
+mean(sesudah2000)
+```
+
+### Uji Kesamaan Varians
+
+- H0 : Varians keduanya sama
+- H1 : Varians keduanya tidak sama
+
+```{r}
+var.test(sebelum2000, sesudah2000)
+```
+
+Karena p-value lebih kecil dari 0.05, maka tolak H0 dan dapat diasumsikan varians tidak sama
+
+### Uji Beda Rata-Rata
+
+- H0 : Rata-rata keduanya sama
+- H1 : Rata-rata keduanya berbeda
+
+```{r}
+t.test(sebelum2000, sesudah2000, var.equal = FALSE)
+```
+
+Karena p-value lebih kecil dari 0.05, maka tolak H0.
+
+Degan tingkat signifikansi 5% diperoleh cukup bukti bahwa rata-rata jarak yang ditempuh dari pesawat yang dibuat sebelum tahun 2000 dan setelah (termasuk) tahun 2000. Jika dilihat pesawat dengan tahun pembuatan 2000 kebawah memiliki jarak tempuh yang lebih besar yaitu sebesar 1282.4 miles sedangkan pesawat yang dibuat tahun 2000 atau keatas hanya sebesar 977.9458 miles
+
+## Bagian C
+Uji apakah terdapat beda rata-rata waktu keterlambatan keberangkatan dari tiga musim (winter: oct-jan, spring: feb-may, summer: june-sept). Lakukan uji lanjutan jika diperlukan.
+
+### Konversi Bulan ke Musim
+```{r}
+bulan_to_musim <- function(x){
+      season <- NULL
+      for(i in 1:length(x)){
+            if (x[i] %in% c(10, 11, 12, 1))
+                  season[i] <- "Winter"
+            else if (x[i] %in% c(2, 3, 4, 5))
+                  season[i] <- "Spring"
+            else
+                  season[i] <- "Summer"
+      }
+      season
+}
+
+newData <- data %>%
+      select(month, dep_delay) %>%
+      mutate(season = bulan_to_musim(month))
+
+kable(sample_n(newData, 10))
+```
+
+### Membuat anova
+
+- H0 : Rata-rata delay diketiga musim tidak terdapat perbedaan
+- H0 : Minimal ada satu rata-rata delay yang berbeda
+```{r}
+res.aov <- aov(dep_delay ~ season, data = newData)
+summary(res.aov)
+```
+ 
+Terlihat bahwa p-value yang diperoleh sangat kecil, oleh karena itu tolak H0, yang berarti diperoleh cukup bukti bahwa ada perbedaan rata-rata diketiga musim. Kita juga dapat menyimpulkan bahwa terdapat pengaruh yang signifikan terhadap musim dan rata-rata delay keberangkatan.
+
+### Posthoc Test
+Karena tolak H0, maka perlu digunakan analisis perbandingan ganda atau posthoc tes untuk melihat rata-rata mana yang berbeda, kali ini akan digunakan uji TukeyHSD
+```{r}
+TukeyHSD(res.aov)
+```
+Terlihat bahwa semua pasang musim memiliki p-value adjusted yang sangat kecil (tertulis 0 tapi sebenarnya bukan 0 banget). Oleh karena itu kita dapat menyimpulakan rata-rata dari ketiga musim sangat berbeda secara signifikan
+
+```{r}
+tapply(newData$dep_delay, newData$season, mean, na.rm = TRUE)
+```
+Terlihat rata-rata yang paling lama pada musim summer sebesar 15.5 menit sedangkan yang terendah pada winter yaitu 9.52 menit
+
+
+## Bagian D
+Berdasarkan data diatas, maskapai mana yang paling bagus kinerjanya serta berikan alasannya
+
+*Ket: Untuk menjawab soal ini kalian bisa melihat dari berbagai sisi, sesuai dengan analisis masing-masing*
+
+Untuk melihat kinerja dari maskapai saya akan menggunakan 2 indikator
+
+### Indikator Pertama
+Indikator pertama adalah ketepatan keberangkatan dan kedatangan sesuai dengan jadwal
+```{r message=FALSE, warning=FALSE}
+data %>% 
+      mutate(dep_delay = abs(dep_delay),
+             arr_delay = abs(arr_delay)) %>%
+      select(dep_delay, arr_delay, carrier, name) %>%
+      group_by(carrier) %>%
+      summarise(mean_dep_delay = mean(dep_delay, na.rm = TRUE),
+                mean_arr_delay = mean(arr_delay, na.rm = TRUE)) %>%
+      melt() %>%
+      ggplot() +
+      geom_col(aes(x = reorder(carrier, value), 
+                   y = value, 
+                   fill = variable), 
+               position = "dodge") +
+      labs(title = "Rata-rata delay (menit)\nKeberangkatan dan Kedatangan Bedasarkan Maskapai",
+           fill = "",
+           x = "", 
+           y = "",
+           caption = "Sumber Data : nycflights13") +
+      scale_y_continuous(expand = c(0, NA)) +
+      scale_fill_brewer(labels = c("Delay Keberangkatan", "Delay Kedatangan"),
+                        palette = "Set2") +
+      theme_minimal() +
+      theme(legend.position = "bottom",
+            plot.title = element_text(hjust = 0.5, size = 15),
+            plot.margin = margin(c(20,20,20,10)),
+            legend.box.margin = margin(-10, 0, 0, 0))
+```
+
+Telihat berdasarkan indikator ini maskapai yang sering delay baik keberangkatan maupun kedatangan adalah maskapai Mesa Airlines Inc. (YV) Sementara itu maskapai yang sangat baik dalam indikator ini adalah maskapai US Airways Inc (US).
+
+### Indikator Kedua
+Indikator kedua adalah kesesuaian lama diudara. Misalanya jika keberangkatan delay 2 menit maka maksimal kedatangan juga maksimal delay 2 menit, jika lebih dari itu maka akan dianggap tidak wajar, karena melebihi waktu penerbangan yang sesungguhnya.
+```{r message=FALSE, warning=FALSE}
+data %>%
+      filter(arr_delay > dep_delay) %>%
+      mutate(tambahan_diudara = arr_delay - dep_delay) %>%
+      select(tambahan_diudara, carrier) %>%
+      group_by(carrier) %>%
+      summarise(jumlah = mean(tambahan_diudara, na.rm = TRUE)) %>%
+      arrange(jumlah) %>%
+      ggplot(aes(x = reorder(carrier, jumlah), 
+                   y = jumlah)) +
+      geom_col(fill = "#fc8d62") +
+      geom_text(aes(label = round(jumlah, 1)), vjust = -0.7, size = 3) +
+      labs(title = "Rata-rata Tambahan Waktu (menit)\ndi Udara Bedasarkan Maskapai",
+           x = "Maskapai", 
+           y = "",
+           caption = "Sumber Data : nycflights13") +
+      scale_y_continuous(expand = c(0, NA), limits = c(0, 23)) +
+      theme_minimal() +
+      theme(legend.position = "bottom",
+            plot.title = element_text(hjust = 0.5, size = 15),
+            plot.margin = margin(c(20,20,20,10)),
+            legend.box.margin = margin(-10, 0, 0, 0),
+            axis.text.y = element_blank())
+```
+
+Dari gambar diatas terlihat bahwa rata-rata penambahan waktu di udara yang terlama adalah maskapai Frontier Airlines Inc. (F9) dengan rata-rata 20.8 menit. Sementara itu maskapai yang memiliki rata-rata penambahan waktu paling sedikit adalah maskapai ExpressJet Airlines Inc.(EV)
+
+### Kesimpulan
+
+Dari beberapa penjelasan diatas untuk menentukan carrier yang mempunyai performa terbaik dapat dilihat dari carrier yang paling sesuai dengan jadwal keberangkatan maupun kedatangan dan lama waktu di udara yang sesuai. Dari hasil analisis diperoleh bahwa maskapai US Airways Inc yang memiliki performa terbaik karena pada indikator satu menduduki peringkat pertama dan indikator dua memduduki urutan ke 4.
+
+### Tambahan
+Selain itu, untuk masyarakat dapat menghindari pemakaian jasa maskapai dengan melihat jenis pesawat yang digunakan oleh maskapai tersebut, terutama dari segi waktu pembuatan pesawat tersebut.
+
+```{r message=FALSE, warning=FALSE}
+tmp <- data %>%
+      distinct(tailnum, carrier, .keep_all = TRUE) %>%
+      select(year_manufacture, carrier) %>%
+      na.omit()
+
+tmp$year_manufacture <- cut(tmp$year_manufacture, 
+                        breaks = c(1940, 2000, 2010, 2020),
+                        labels = c("Bawah 2000", "2000-2010", "2010 Keatas"))
+
+tmp %>%
+      group_by(carrier, year_manufacture) %>%
+      summarise(jumlah = n()) %>%
+      ggplot(aes(x = reorder(carrier, jumlah), y = jumlah, fill = year_manufacture)) +
+      geom_col(position = "dodge") +
+      labs(title = "Jumlah Pesawat Berdasarkan Waktu Pembuatan",
+           fill = "",
+           x = "", 
+           y = "",
+           caption = "Sumber Data : nycflights13") +
+      scale_y_continuous(expand = c(0, NA), limits = c(0, 490)) +
+      scale_fill_brewer(palette = "Set2") +
+      theme_minimal() +
+      theme(legend.position = "bottom",
+            plot.title = element_text(hjust = 0.5, size = 15),
+            plot.margin = margin(c(20,20,20,10)),
+            legend.box.margin = margin(-10, 0, 0, 0))
+
+```
+
+Dari gambar diatas terlihat bahwa maskapai Envoy Air (MQ) hanya memiliki pesawat buatan tahun 2000 kebawah. Begitu juga dengan maskapai Delta Air Lines Inc. (DL) masih banyak menggunakan pesawat buatan tahun 2000 kebawah, tentu saja hal ini dapat menjadi pertimbangan dalam menentukan maskapai yang akan digunakan. Semakin tua pesawat maka akan semakin beresiko pesawat itu.
+
+Sementara itu maskapai dengan jumlah pesawat terbanyak buatan 2010 keatas adalah maskapai Southwest Airlines Co (VN) dan terdapat juga beberapa maskapai lainnya yang sudah memiliki pesawat buatan 2010 keatas.
+
+
+# Nomor 2
+Konsumsi listrik setiap bulan oleh sebuah pabrik kimia dianggap berkorelasi dengan rata-rata suhu sekitar (𝑥1), jumlah hari dalam bulan (𝑥2), kemurnian produk rata-rata (𝑥3) dan jumlah produk yang diproduksi dalam ton (𝑥4). Data histori pada tahun sebelumnya disajikan dalam tabel dibawah ini:
+
+| y          | x1        | x2        | x3        | x4         |
+|------------|-----------|-----------|-----------|------------|
+|     240    |     25    |     24    |     91    |     100    |
+|     236    |     31    |     21    |     90    |     95     |
+|     270    |     45    |     24    |     88    |     110    |
+|     274    |     60    |     25    |     87    |     88     |
+|     301    |     65    |     25    |     91    |     94     |
+|     316    |     72    |     26    |     94    |     99     |
+|     300    |     80    |     25    |     87    |     97     |
+|     296    |     84    |     25    |     86    |     96     |
+|     267    |     75    |     24    |     88    |     110    |
+|     276    |     60    |     25    |     91    |     105    |
+|     288    |     50    |     25    |     90    |     100    |
+|     261    |     38    |     23    |     89    |     98     |
+
+## Membuat Data Frame
+```{r}
+df <- data.frame(y = c(240, 236, 270, 274, 301, 316, 300, 296, 267, 276, 288, 261),
+                 x1 = c(25, 31, 45, 60, 65, 72, 80, 84, 75, 60, 60, 38),
+                 x2 = c(24, 21, 24, 25, 25, 26, 25, 25, 24, 25, 25, 23),
+                 x3 = c(91, 90, 88, 87, 91, 94, 87, 86, 88, 91, 90, 89),
+                 x4 = c(100, 95, 110, 88, 94, 99, 97, 96, 110, 105, 100, 98))
+kable(df)
+```
+
+## Bagian A
+
+Buatlah model regresi linear sederhana berganda yang fit kedata tersebut!
+```{r}
+res.model <- lm(y ~  x1 + x2 + x3 + x4, data = df)
+summary(res.model)
+```
+
+Dari hasil diatas diperoleh model regresi `y = -114.6999 + 0.8327*x1 + 6.4456*x2 + 2.6438*x3 - 0.4980*x4`. Akan tetapi jika dilihat hanya x1 yang signifikan pada model. Variabel lainnya tidak sognifikan mempengaruhi model. 
+
+*Ket : Saya kurang tau kita disuruh mencari model terbaik apa tidak. Disini saya berasumsi semua variabel mau signifikan atau tidak tetap dimasukkan dimodel*
+
+## Bagian B
+
+Hitung penduga dan selang kepercayaan bootstrap dari model linear berganda pada soal a.
+
+### Bootsrap Sampling
+```{r}
+boot <- NULL
+iter <- 1000
+for (i in 1:iter){
+   index_selected <- sample(nrow(df), replace = TRUE)
+   my_sample <- df[index_selected, ]   
+   model <- lm(y ~  x1 + x2 + x3 + x4, data = my_sample)
+   if(is.null(boot))
+      boot <- rbind(coef(model))
+   else
+      boot <- rbind(boot, coef(model))
+   
+}
+boot <- data.frame(boot)
+boot <- na.omit(boot)
+kable(head(boot, 10))
+```
+
+### Menghitung Confident Interval
+Metode untuk menghitung interval cukup banyak, silahkan baca [disini](https://towardsdatascience.com/bootstrapping-confidence-intervals-the-basics-b4f28156a8da) dan gunakan salah satu
+
+```{r}
+result <- sapply(boot, function(x){
+   mean_boot <-  mean(x)
+   se_boot <- sd(x)
+   df <- length(x) - 1
+   ci_95_lower <- mean_boot - qt(0.05/2, df, lower.tail = FALSE) * se_boot
+   ci_95_upper <- mean_boot + qt(0.05/2, df, lower.tail = FALSE) * se_boot
+   
+   c(mean_boot = mean_boot,
+     se_boot = se_boot,
+     ci_95_lower = ci_95_lower,
+     ci_95_upper = ci_95_upper)
+})
+result
+```
+
+## Bagian C
+Interpertasikan hasil yang dihasilkan
+
+Dari hasil yang diperoleh terlihat bahwa selang interval 95% untuk setiap parameter sangat lebar, ini menandakan parameter yang akan kita buat berdasarkan data yang ada kurang bagus. Hal ini selaras dengan hasil yang kita peroleh sebelumnya bahwa hanya satu parameter yang signifikan, yaitu parameter b1. Oleh karena itu sebaiknya variabel independet yang digunakan dikurangi dan hanya menggunakan yang signifikan saja.
+
+# Nomor 3
+Sebuah perusahaan komputer membuat dua buah software antivirus yakni jenis A dan B. Untuk keperluan penelitian, maka 1000 virus diinstal pada dua buah komputer. Setelah kedua komputer diisi dengan virus tersebut, kemudian diinstal antivirus jenis A untuk komputer I dan antivirus jenis B untuk komputer II. Beberapa saat kemudian, diketahui dalam komputer I terdapat 825 virus yang dapat dinonaktifkan dan pada komputer II terdapat 760 virus yang berhasil dinonaktifkan. Tentukan selang kepercayaan 95% bagi beda proporsi kematian virus oleh antivirus jenis A dan B.
+
+## Proporsi per Antivirus
+
+**Proporsi antivirus yang berhasil dinonaktifkan dengan antivirus A**
+```{r}
+n1 <- 1000
+x1 <- 825
+p1 <- x1 / n1
+p1
+```
+
+**Proporsi antivirus yang berhasil dinonaktifkan dengan antivirus B**
+```{r}
+n2 <- 1000
+x2 <- 760
+p2 <- x2 / n2
+p2
+```
+
+## Selang Kepercayaan
+Untuk rumus yang digunakan bisa dilihat disini, [Confidence Intervals for the Difference Between Two Population Proportions or Means](https://online.stat.psu.edu/stat100/lesson/9/9.3)
+
+```{r}
+alpa <-  0.05
+se <- sqrt(p1*(1-p1)/n1 + p2*(1-p2)/n2)
+
+lower <- (p1 - p2) - qnorm(alpa / 2, lower.tail = FALSE) * se
+upper <- (p1 - p2) + qnorm(alpa / 2, lower.tail = FALSE) * se
+```
+
+### Batas Bawah
+```{r}
+lower
+```
+### Batas Atas
+```{r}
+upper
+```
+
+Terlihat bahwa dengan tingkat kepercayaan 95%, perbedaan antara proporsi virus yang dapat dinonaktifkan oleh antivirus A dan B berada antara `0.03` dan  `0.1`

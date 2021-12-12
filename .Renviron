@@ -1,0 +1,2 @@
+PATH="${RTOOLS40_HOME}\usr\bin;${PATH}"
+TWITTER_PAT=C:/Users/Ridson Alfarizal/Documents/.rtweet_token2.rds
