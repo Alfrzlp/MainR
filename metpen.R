@@ -3,7 +3,7 @@ library(olsrr)
 
 df <- 
   readxl::read_xlsx('D:/__SEMESTER 5/Metode Penelitian/data.xlsx') %>% 
-  `colnames<-`(c('kab', 'ak', 'sm', 'tk', 'r', 'rb', 'kp', 'p')) %>% 
+  `colnames<-`(c('kab', 'ak','tk', 'rb', 'kp')) %>% 
   type_convert() %>% 
   drop_na()
 
@@ -275,9 +275,21 @@ pchisq(2 * (logLik(nbm) - logLik(pm)), df = 1, lower.tail = FALSE)
 
 # Generalized Poisson Regression ------------------------------------------
 library(VGAM)
-gpm <- vglm(ak ~ tk + rb + kp, genpoisson2, data = df, trace = TRUE, model = T)
+gpm <- vglm(ak ~ (tk + rb + kp), genpoisson2, data = df, trace = TRUE, model = T)
 summary(gpm)
 summary(pm)
+step4(gpm)
+
+
+
+data.frame(
+  model = c('Regresi Poisson', 'Negative Binomial', 'Generalized Poisson Regression'),
+  aic = c(AIC(pm), AIC(nbm), AIC(gpm)),
+  bic = c(BIC(pm), BIC(nbm), BIC(gpm))
+)
+
+lmtest::lrtest(pm)
+
 
 lrtest_vglm(gpm)
 fitted.values(gpm)[2]
@@ -286,7 +298,7 @@ fitted.values(gpm)[2]
 # miu = exp(b0 + b1*x1 + ....)
 (coef(gpm)[1] + sum(select(df[2,], c(tk, rb, kp))*coef(gpm)[3:5]) ) %>% 
   exp
-
+2.07*10^-3
 
 
 

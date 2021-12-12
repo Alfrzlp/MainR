@@ -54,3 +54,11 @@ lmtest::lrtest(nbm)
 
 lrtest_vglm(gpm)
 
+
+# Perbandingan Antar Model ------------------------------------------------
+data.frame(
+  model = c('Regresi Poisson', 'Negative Binomial', 'Generalized Poisson Regression'),
+  aic = c(AIC(pm), AIC(nbm), AIC(gpm)),
+  bic = c(BIC(pm), BIC(nbm), BIC(gpm))
+)
+
