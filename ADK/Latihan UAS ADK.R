@@ -91,6 +91,7 @@ x = c(1, 1, 30, 0)
 # Nilai sum(x*suv) akan memberikan nilai beta + x*beta + .. dst
 
 # output fungsi sofmax adalah 
-# nilai peluang dari suv, mpv, dan city car
+# Nilai X*beta
 c(sum(x*suv), sum(x*mpv), sum(x*cc))
+# nilai peluang dari suv, mpv, dan city car
 softmax(c(sum(x*suv), sum(x*mpv), sum(x*cc)))
