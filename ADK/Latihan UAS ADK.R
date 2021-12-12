@@ -85,10 +85,12 @@ read.table(textConnection(s), header = F) %>%
 suv = c(23.7380, -0.8770, -0.7015609, -0.6540)
 mpv = c(11.1340, -0.4250, -0.3177459, 0.0570)
 cc = 0
+
 # prediksi
 x = c(1, 1, 30, 0)
 # Nilai sum(x*suv) akan memberikan nilai beta + x*beta + .. dst
 
 # output fungsi sofmax adalah 
 # nilai peluang dari suv, mpv, dan city car
+c(sum(x*suv), sum(x*mpv), sum(x*cc))
 softmax(c(sum(x*suv), sum(x*mpv), sum(x*cc)))
