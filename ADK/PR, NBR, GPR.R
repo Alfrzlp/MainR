@@ -62,3 +62,4 @@ data.frame(
   bic = c(BIC(pm), BIC(nbm), BIC(gpm))
 )
 
+exp(2.07*10^-3)
