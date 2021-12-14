@@ -1,0 +1,32 @@
+snippet read
+	s <- ${1:string}
+
+	read.table(textConnection(s), header = F)
+	
+snippet readkoma
+	s <- ${1:string}
+	
+	read.table(textConnection(s), header = F) %>% 
+	  mutate_all(~str_replace_all(.x, ',', '.')) %>% 
+	  type_convert()
+	
+snippet readmiring
+	s <- ${1:string}
+	
+	read.table(textConnection(s), header = F) %>% 
+	  t() %>% 
+	  as.data.frame() %>% 
+	  remove_rownames() %>% 
+	  `colnames<-`(${1:vector})
+	  
+	  
+snippet readkanan
+	s <- ${1:string}
+
+	colname <- c()
+	
+	read.table(textConnection(s), header = F) %>% 
+	  {rbind(
+	    (.)[1:2] %>% `colnames<-`(colname),
+	    (.)[3:4] %>% `colnames<-`(colname) 
+	  )}
