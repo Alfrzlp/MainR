@@ -1,20 +1,28 @@
 # clearscreen
 cat("\014")
-cat('Bismillah,\n')
 # Customise the R prompt that prefixes every command
 # (use " " for a blank prompt)
 
 options(prompt = "R> ", show.signif.stars = F)
 
 if(interactive()){
-  try(message('Hi Ridson, welcome to R... \n\n\n'), silent = TRUE)
-  # message(sample(nasehat, 1), '\n\n')
+
   suppressMessages(require(devtools))
-  suppressWarnings(require(tidyverse))
+  suppressMessages(require(tidyverse))
+  
+  jam <- as.numeric(str_extract(Sys.time(), pattern = '\\s\\d+'))
+  salam <- 
+    case_when(
+      between(jam, 1, 10) ~ 'Selamat Pagi', 
+      between(jam, 10, 15) ~ 'Selamat Siang', 
+      between(jam, 16, 18) ~ 'Selamat Sore', 
+      between(jam, 19, 24) ~ 'Selamat Malam' 
+    )
+  cat(salam, 'Ridson..')
+  message('\nSelamat datang di R\n')
 }
 
 
-# setwd("~/Main R")
 
 .env = new.env()
 # menjadi fungsi bawaan
@@ -30,13 +38,6 @@ if(interactive()){
               col.names = colnames, sep = '\t',)
 }
 
-.env$str2vec <- function(str, adakoma = T, pemisah = ' '){
-  str = gsub(",", ".", str)
-  str = gsub(paste0(pemisah, "|\t|\n"), " ", str)
-  str = strsplit(str, split = " ")[[1]]
-  # ambil yang ada angka dan ubah jadi numeric
-  vec = as.numeric(str[stringr::str_detect(str, "[:alnum:]")])
-  return(vec)
-}
+
 
 attach(.env)
