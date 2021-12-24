@@ -18,6 +18,10 @@ library(MASS)
 m <- polr(mi ~ ses + life_events, df_mi, Hess = T, model = T, method="logistic")
 summary(m)
 
+# Misal a b c dimana c (kat referensi) maka ada 2 model
+# ln[ P(Y <= a)/P(Y > a) ] 
+# ln[ P(Y <= b)/P(Y > b) ] 
+
 
 # library(ordinal)
 # clm(mi ~ ses + life_events, data = df_mi, link = "logit", threshold = 'flexible')
@@ -61,7 +65,7 @@ DescTools::PseudoR2(m, which = c('CoxSnell', 'Nagelkerke', 'McFadden')) %>%
 # untuk proporional odds model, untuk menguji apakah
 # koefisien slope sama untuk setiap kategori variabel respon
 
-# Gagal Tolak Ho : Garis regresi pararel
+# Ho : Garis regresi pararel (Model menghasilkan koefisien regresi (slope) yang sama)
 brant::brant(m) 
 
 # Gagal tolak Ho semua :  
@@ -69,3 +73,18 @@ brant::brant(m)
 
 # Omnibus Gagal tolak : artinya semua variabel memenuhi asumsi proportional odds
 # jika gagal tolak maka minimal terdapat 1 variabel yang tidak memnuhi
+
+
+
+# Interpretasi ------------------------------------------------------------
+
+# Contoh ln[ P(Y <= 1)/P(Y > 1) ] 
+
+# 1 = sangat puas, 2 = puas, 3 = tidak puas
+# jenis pekerjaan (1 = pelajar/mahasiswa, 2 = pengusaha/wiraswasta, 3 =
+#                    pegawai/karyawan, 4 = tidak bekerja).
+
+# Pelanggan yang bekerja sebagai pelajar/mahasiswa memiliki kecenderungan sebesar 
+# exp(???1,091) = 0,3359 kali dibandingkan pelanggan yang tidak bekerja untuk tingkat
+# kepuasan yang sangat puas (dibandingkan dengan minimum puas)
+

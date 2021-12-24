@@ -62,4 +62,21 @@ data.frame(
   bic = c(BIC(pm), BIC(nbm), BIC(gpm))
 )
 
-exp(2.07*10^-3)
+
+# Interpretasi ------------------------------------------------------------
+# exp(Bj) -----------------------------------------------------------------
+# saat Xj berubah satu satuan maka nilai frekuensi harapan akan
+# berubah sebesar exp(Bj) dg asumsi variabel bebas yg lain konstan
+
+
+
+# [exp(Bj) - 1]*100% ------------------------------------------------------
+# perubahan (%) dari frekuensi harapan utk setiap kenaikan 1 unit 
+# variabel Xj adalah [exp(Bj) - 1]*100%
+
+# Jika var dummy maka dia rasio frekuensi harapan kategori tertentu
+# terhadap kategori referensi.
+
+# Frekuensi Harapan laki2 untuk banyaknya kursus matematika
+# sebelumnya adalah lebih tinggi [exp(Bj) - 1]*100% dari pada wanita
+

@@ -95,3 +95,8 @@ x = c(1, 1, 30, 0)
 c(sum(x*suv), sum(x*mpv), sum(x*cc))
 # nilai peluang dari suv, mpv, dan city car
 softmax(c(sum(x*suv), sum(x*mpv), sum(x*cc)))
+
+
+# Tahun 2016 --------------------------------------------------------------
+
+
