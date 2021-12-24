@@ -10,7 +10,7 @@ df_mi <-
   )
 
 df_mi$mi
-
+df_mi
 
 # Model ------------------------------------------------------------------
 library(MASS)
@@ -49,9 +49,9 @@ anova(m, polr(kat_stress ~ 1, df_hasil, Hess = T))
 library(generalhoslem)
 
 lipsitz.test(m)
-logitgof(df_mi$mi, fitted(m), ord = TRUE)
+logitgof(df_mi$mi, fitted(m), ord = TRUE, g = 10)
 
-chisq.test(m$model$mi, predict(m))
+
 
 # Pseudo R2 ---------------------------------------------------------------
 # Tidak bisa menilai keakuratan model. 
@@ -77,6 +77,9 @@ brant::brant(m)
 
 
 # Interpretasi ------------------------------------------------------------
+# Ingat SPSS harus ubah koef var bebas - jadi + dan sebaliknya
+# intercept tidak
+
 
 # Contoh ln[ P(Y <= 1)/P(Y > 1) ] 
 
@@ -87,4 +90,34 @@ brant::brant(m)
 # Pelanggan yang bekerja sebagai pelajar/mahasiswa memiliki kecenderungan sebesar 
 # exp(???1,091) = 0,3359 kali dibandingkan pelanggan yang tidak bekerja untuk tingkat
 # kepuasan yang sangat puas (dibandingkan dengan minimum puas)
+
+# Template
+# variabel x = i memiliki kecenderungan sebesar [odds ratio]
+# (dibandingkan variabel x = kat ref) untuk y = y kat model 
+# dibandingkan minimal y = y kat diatas model
+
+# Nilai X*Beta
+sangat_puas <- sum(c(-1.054, -0.519, 1.289)*c(1, 1, 1))
+puas <- sum(c(0.133, -0.519, 1.289)*c(1, 1, 1))
+
+# Peluang
+exp(sangat_puas)/(1 + exp(sangat_puas))
+exp(puas)/(1 + exp(puas))
+exp(0)/(1 + exp(0))
+
+
+
+coef(summary(m))[3:5]
+
+df_mi[1,]
+
+x <- m$zeta + sum(coef(m)*c(1, 1))
+x
+softmax(c(x, 0))
+
+
+1/(1 + exp(-(m$zeta[3] + sum(coef(m)*c(1, 1)))))
+predict(m, type = 'prob')[1,]
+
+
 
