@@ -18,7 +18,7 @@ pm <- glm(jk ~ tk + rb + kp, data = dataku, family = 'poisson')
 summary(pm)
 
 lmtest::lrtest(pm)
-
+anova(glm(jk ~ 1, data = dataku, family = 'poisson'), pm, test = 'LRT')
 
 
 # Cek equidispersi --------------------------------------------------------
@@ -35,6 +35,10 @@ library(MASS)
 
 nbm <- glm.nb(jk ~ rb + kp + tk, data = dataku)
 summary(nbm)
+
+# Ho : Poisson Lebih baik
+# H1 : Binomial Negatif Lebih baik
+lrtest(pm, nbm)
 
 
 # Generalized Poisson Regression ------------------------------------------

@@ -3,7 +3,7 @@ cat("\014")
 # Customise the R prompt that prefixes every command
 # (use " " for a blank prompt)
 
-options(prompt = "R> ", show.signif.stars = F)
+options(prompt = "~> ", show.signif.stars = F)
 
 if(interactive()){
 

@@ -4,7 +4,7 @@ create_package("/path/to/my/coolpackage")
 use_git()
 
 # membuat atau edit fungsi nya
-use_r('str2vec')
+use_r('read_string')
 
 # simulates the process of building, installing,
 # attaching the package
@@ -34,6 +34,8 @@ install()
 use_package("stringr")
 use_package('reticulate')
 use_package('tesseract')
+use_package('tidyr')
+use_package('dplyr')
 
 # membuat fungsi baru
 use_r("read_img")
@@ -154,15 +156,15 @@ dput_small<- function(x,
     if('list' %in% class(x)) create_fun <- "list" else
       if('data.table' %in% class(x)) create_fun <- "data.table::data.table" else
         create_fun <- "data.frame"
-      
+
       if(random) {
         set.seed(seed)
-        if(create_fun == "list") x <- x[sample(1:length(x),n)] else 
+        if(create_fun == "list") x <- x[sample(1:length(x),n)] else
           x <- x[sample(1:nrow(x),n),]
       } else {
         x <- head(x,n)
       }
-      
+
       line_sep <- if (multiline) "\n    " else ""
       cat(sep='',name," <- ",create_fun,"(\n  ",
           paste0(unlist(

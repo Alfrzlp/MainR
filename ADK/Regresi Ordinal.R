@@ -5,17 +5,18 @@ life_events <- c(1, 9, 4, 3, 2, 0, 1, 3, 3, 7, 1, 2, 5, 6, 3, 1, 8, 2, 5, 5, 9, 
 df_mi <- 
   data.frame(mi = mental_impairment, ses, life_events) %>% 
   mutate(
-    mi = factor(mi, levels = rev(unique(mi))),
-    ses = factor(ses, levels = c(1, 0))
+    mi = factor(mi, levels = unique(mi)),
+    ses = factor(ses, levels = c(0, 1))
   )
 
 df_mi$mi
 df_mi
 
 # Model ------------------------------------------------------------------
+# Hasil yang didapat sama dengan SPSS harus di - dulu
 library(MASS)
 
-m <- polr(mi ~ ses + life_events, df_mi, Hess = T, model = T, method="logistic")
+m <- polr(mi ~ ses + life_events, df_mi, Hess = T, model = T)
 summary(m)
 
 # Misal a b c dimana c (kat referensi) maka ada 2 model
@@ -49,7 +50,7 @@ anova(m, polr(kat_stress ~ 1, df_hasil, Hess = T))
 library(generalhoslem)
 
 lipsitz.test(m)
-logitgof(df_mi$mi, fitted(m), ord = TRUE, g = 10)
+logitgof(df_mi$mi, fitted(m), ord = TRUE, g = 19)
 
 
 
@@ -77,7 +78,7 @@ brant::brant(m)
 
 
 # Interpretasi ------------------------------------------------------------
-# Ingat SPSS harus ubah koef var bebas - jadi + dan sebaliknya
+# Ingat SPSS dan polr harus ubah koef var bebas - jadi + dan sebaliknya
 # intercept tidak
 
 
@@ -116,8 +117,15 @@ x
 softmax(c(x, 0))
 
 
-1/(1 + exp(-(m$zeta[3] + sum(coef(m)*c(1, 1)))))
-predict(m, type = 'prob')[1,]
+1/(1 + exp(-(m$zeta[1] + sum(coef(m)*c(1, 1)))))
+a <- (1 / (1 + exp(-(m$zeta[1] + sum(coef(m) * c(1, 1) )))))
+a
+b <- (1 / (1 + exp(-(m$zeta[2] + sum(coef(m) * c(1, 1) ))))) - a
+b
+c <- (1 / (1 + exp(-(m$zeta[3] + sum(coef(m) * c(1, 1) ))))) - a - b
+c
 
+c(a, b, c, 1-a-b-c)
+predict(m, df_mi, type = 'prob')[1,]
 
 
