@@ -3,11 +3,8 @@ ses <- c(1, 1, 1, 1, 0, 1, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1,
 life_events <- c(1, 9, 4, 3, 2, 0, 1, 3, 3, 7, 1, 2, 5, 6, 3, 1, 8, 2, 5, 5, 9, 3, 3, 1, 0, 4, 3, 9, 6, 4, 3, 8, 2, 7, 5, 4, 4, 8, 8, 9) 
 
 df_mi <- 
-  data.frame(mi = mental_impairment, ses, life_events) %>% 
-  mutate(
-    mi = factor(mi, levels = unique(mi)),
-    ses = factor(ses, levels = c(0, 1))
-  )
+  data.frame(mi = mental_impairment, ses, life_events) %>%
+  mutate_at(1:2, ~ as.factor(.x))
 
 df_mi$mi
 df_mi
@@ -37,6 +34,17 @@ p <- pnorm(abs(ctable[, "t value"]), lower.tail = FALSE) * 2
 # confint.default(m) # CIs assuming normality
 exp(cbind(odds_ratio = coef(m), ci))
 
+rbind(
+  exp(cbind(odds_ratio = coef(m), ci)),
+  matrix(nrow = 3, ncol = 3, NA_real_)
+)
+
+
+
+cbind(
+  ctable,
+  exp(cbind(odds_ratio = coef(m), ci))
+)
 
 
 # Uji serentak ------------------------------------------------------------

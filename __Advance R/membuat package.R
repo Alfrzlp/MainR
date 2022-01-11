@@ -1,14 +1,15 @@
 library(devtools)
-create_package("/path/to/my/coolpackage")
+create_package("C:/Users/Ridson Alfarizal/Documents/coba")
 
 use_git()
 
 # membuat atau edit fungsi nya
-use_r('read_string')
+use_r("read_string")
 
 # simulates the process of building, installing,
 # attaching the package
 load_all()
+
 
 check()
 
@@ -20,11 +21,12 @@ document()
 ?str2vec
 ?read_img
 ?dm
+?bpjs
 
 # check lagi setelah tambah dokumentasi
 check()
 
-
+devtools::install_github("")
 # final
 # jika ada error error retriviewing help
 # maka restart r session
@@ -32,13 +34,26 @@ install()
 
 # jika pakai package
 use_package("stringr")
-use_package('reticulate')
-use_package('tesseract')
-use_package('tidyr')
-use_package('dplyr')
+use_package("reticulate")
+use_package("tesseract")
+use_package("tidyr")
+use_package("dplyr")
+use_package("zeallot")
+
+# Data --------------------------------------------------------------------
+bpjs <- read.csv("D:/_Datasets/case_cost_prediction_train.csv")
+use_data(bpjs)
+
+awal <- pryr::mem_used()
+load_all()
+pryr::mem_used() - awal
+
+invisible(dplyr::storms)
+pryr::mem_used()
+pryr::object_size(dplyr::storms)
 
 # membuat fungsi baru
-use_r("read_img")
+use_r("utils")
 
 # buat readme
 use_readme_rmd()
@@ -62,9 +77,9 @@ use_devtools()
 
 
 # nama --------------------------------------------------------------------
-available::available('vgwr')
+available::available("vgwr")
 getwd()
-usethis::create_package('')
+usethis::create_package("")
 
 load_all()
 # Ctrl+Shift+L
@@ -76,7 +91,7 @@ load_all()
 styler::style_pkg() # restyles an entire R package.
 styler::style_dir() # restyles all files in a directory.
 usethis::use_tidy_style() # is wrapper that applies one of the above functions depending on whether the current project is an R package or not.
-styler::style_file() # restyles a single file.
+styler::style_file(path = "../all/__Advance R/membuat package.R") # restyles a single file.
 styler::style_text() # restyles a character vector.
 
 
@@ -110,10 +125,10 @@ packageStartupMessage("Welcome to my package")
 
 dplyr::tribble(
   ~where, ~english,
-  "beach",     "US",
-  "coast",     "US",
-  "seashore",     "UK",
-  "seaside",     "UK"
+  "beach", "US",
+  "coast", "US",
+  "seashore", "UK",
+  "seaside", "UK"
 )
 
 withr::local_locale(c("LC_TIME" = "C"))
@@ -145,32 +160,47 @@ times <- function(x, y) x * y
 
 
 # dput --------------------------------------------------------------------
-dput_small<- function(x,
-                      name=as.character(substitute(x)),
-                      multiline = TRUE,
-                      n=if ('list' %in% class(x)) length(x) else nrow(x),
-                      random=FALSE,
-                      seed = 1){
+dput_small <- function(x,
+                       name = as.character(substitute(x)),
+                       multiline = TRUE,
+                       n = if ("list" %in% class(x)) length(x) else nrow(x),
+                       random = FALSE,
+                       seed = 1) {
   name
-  if('tbl_df' %in% class(x)) create_fun <- "tibble::tibble" else
-    if('list' %in% class(x)) create_fun <- "list" else
-      if('data.table' %in% class(x)) create_fun <- "data.table::data.table" else
-        create_fun <- "data.frame"
+  if ("tbl_df" %in% class(x)) {
+    create_fun <- "tibble::tibble"
+  } else
+  if ("list" %in% class(x)) {
+    create_fun <- "list"
+  } else
+  if ("data.table" %in% class(x)) {
+    create_fun <- "data.table::data.table"
+  } else {
+    create_fun <- "data.frame"
+  }
 
-      if(random) {
-        set.seed(seed)
-        if(create_fun == "list") x <- x[sample(1:length(x),n)] else
-          x <- x[sample(1:nrow(x),n),]
-      } else {
-        x <- head(x,n)
-      }
+  if (random) {
+    set.seed(seed)
+    if (create_fun == "list") {
+      x <- x[sample(1:length(x), n)]
+    } else {
+      x <- x[sample(1:nrow(x), n), ]
+    }
+  } else {
+    x <- head(x, n)
+  }
 
-      line_sep <- if (multiline) "\n    " else ""
-      cat(sep='',name," <- ",create_fun,"(\n  ",
-          paste0(unlist(
-            Map(function(item,nm) paste0(nm,if(nm=="") "" else " = ",paste(capture.output(dput(item)),collapse=line_sep)),
-                x,if(is.null(names(x))) rep("",length(x)) else names(x))),
-            collapse=",\n  "),
-          if(create_fun == "data.frame") ",\n  stringsAsFactors = FALSE)" else "\n)")
+  line_sep <- if (multiline) "\n    " else ""
+  cat(
+    sep = "", name, " <- ", create_fun, "(\n  ",
+    paste0(unlist(
+      Map(
+        function(item, nm) paste0(nm, if (nm == "") "" else " = ", paste(capture.output(dput(item)), collapse = line_sep)),
+        x, if (is.null(names(x))) rep("", length(x)) else names(x)
+      )
+    ),
+    collapse = ",\n  "
+    ),
+    if (create_fun == "data.frame") ",\n  stringsAsFactors = FALSE)" else "\n)"
+  )
 }
-

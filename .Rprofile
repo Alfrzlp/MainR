@@ -5,7 +5,7 @@ cat("\014")
 
 options(prompt = "~> ", show.signif.stars = F)
 
-if(interactive()){
+if (interactive()) {
 
   suppressMessages(require(devtools))
   suppressMessages(require(tidyverse))
@@ -20,24 +20,5 @@ if(interactive()){
     )
   cat(salam, 'Ridson..')
   message('\nSelamat datang di R\n')
+  rm(salam, jam)
 }
-
-
-
-.env = new.env()
-# menjadi fungsi bawaan
-.env$ht = function(d, n = 5) rbind(head(d, n), tail(d, n))
-.env$nice_par = function(mar = c(3, 3, 2, 1), mgp = c(2, 0.4, 0), tck = -0.01,
-                         cex.axis = 0.9, las = 1, mfrow = c(1, 1), ...) {
-  par(mar = mar, mgp = mgp, tck = tck, cex.axis = cex.axis, las = las,
-      mfrow = mfrow, ...)
-}
-
-.env$copy2c <- function(df, dec = ',', rownames = F, colnames = F, ...) {
-  write.table(df, 'clipboard', dec = dec, row.names = rownames,
-              col.names = colnames, sep = '\t',)
-}
-
-
-
-attach(.env)

@@ -2,10 +2,10 @@ library(RPostgreSQL)
 library(DBI)
 
 # nama database
-db = 'belajar'
+db = 'kamus'
 
 con <- dbConnect(RPostgres::Postgres(),
-                 dbname = db, user = "ridsonap", password = "ridson")
+                 dbname = 'kamus', user = "ridsonap", password = "ridson")
 
 # melihat tabel apa saj yang ada
 dbListTables(con)
@@ -15,7 +15,7 @@ dbListTables(con)
 df = mtcars %>% 
   mutate(carname = rownames(mtcars), .before = mpg)
 df
-dbWriteTable(con, "bandara", bandara)
+dbWriteTable(con, "data", db, overwrite = T)
 
 bandara[is.na(bandara)] = NULL
 
