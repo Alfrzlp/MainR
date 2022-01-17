@@ -341,3 +341,100 @@ write.csv(
 )
 
 MAPE(train$pred_num_sold, train$num_sold)*100
+
+
+
+# new ---------------------------------------------------------------------
+train <- train %>% mutate(pred_num_sold = NA)
+test <- test %>% mutate(num_sold = NA)
+subs <- list()
+x <- 1
+
+for(i in unique(train$country)){
+  for(j in unique(train$store)){
+    for(k in unique(train$product)){
+      
+      mug_ts <- 
+        train %>% dplyr::filter(
+          product == k,
+          store == j,
+          country == i
+        ) %>% 
+        {ts((.)$num_sold, start = c(2015, 1), frequency = 1)}
+      
+      x_mug <- 
+        train %>% dplyr::filter(
+          product == k,
+          store == j,
+          country == i
+        ) %>% 
+        arrange(date) %>% 
+        select(day, month) %>% 
+        as.matrix()
+      
+      stlm_model <- mug_ts %>% log() %>% 
+        msts(seasonal.periods = c(7*1:102)) %>% 
+        stlm(method = "arima", lambda = 'auto', xreg = x_mug)
+      
+      cat(paste('MAPE   :', accuracy(stlm_model)[5], '\n'))
+      
+      
+      x_mug_test <- 
+        test %>% dplyr::filter(
+          product == k,
+          store == j,
+          country == i
+        ) %>% 
+        arrange(date) %>% 
+        select(day, month) %>% 
+        as.matrix()
+      
+      subm <- 
+        test %>% dplyr::filter(
+          product == k,
+          store == j,
+          country == i
+        ) %>% 
+        arrange(date) %>% 
+        select(row_id)
+      
+      pred <- forecast(stlm_model, h = 365, newxreg = x_mug_test)
+      subm['num_sold'] = pred$mean %>% exp
+      subs[[x]] <- subm
+      x = x + 1
+      
+      test <- test %>% 
+        arrange(date) %>% 
+        mutate(
+          num_sold = ifelse((product == k & store == j & country == i), pred$mean, num_sold)
+        )
+      
+      train <- train %>% 
+        mutate(
+          pred_num_sold = ifelse((product == k & store == j & country == i), stlm_model$fitted, pred_num_sold)
+        )
+    }
+  }
+}
+
+MAPE(train$pred_num_sold, train$num_sold)*100
+accuracy(stlm_model)
+
+head(train) %>% 
+  mutate(pred_num_sold = exp(pred_num_sold))
+
+
+length(subs)
+subm <- 
+  bind_rows(subs) %>% 
+  arrange(row_id)
+head(subm)
+
+
+write.csv(
+  subm,
+  'E:/subm.csv', 
+  row.names = F,
+  quote = F
+)
+
