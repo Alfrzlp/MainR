@@ -27,8 +27,8 @@ autoplot(jb, lwd = 1.5, colour = "white") +
     expand = expansion(mult = c(0, 0))
   ) +
   scale_x_continuous(
-     breaks = c(5, 10, 15),
-     labels = c("2010", "2015", "2021")
+    breaks = c(5, 10, 15),
+    labels = c("2010", "2015", "2021")
   ) +
   # biar gak ada yang kepotong
   coord_cartesian(clip = "off") +
@@ -39,25 +39,31 @@ autoplot(jb, lwd = 1.5, colour = "white") +
   theme(
     plot.title.position = "plot",
     text = element_text(colour = "gray100"),
-    plot.title = element_text(family = "Arial", face = "bold",
-                              colour = "white", size = rel(1.75)),
-    plot.subtitle = element_text(family = "Arial",
-                                 colour = "white", size = rel(1.25)),
+    plot.title = element_text(
+      family = "Arial", face = "bold",
+      colour = "white", size = rel(1.75)
+    ),
+    plot.subtitle = element_text(
+      family = "Arial",
+      colour = "white", size = rel(1.25)
+    ),
     axis.title.y = element_text(hjust = 1, colour = "gray100"),
     axis.line = element_line(colour = "gray70"),
-    axis.ticks = element_line(colour = 'gray70'),
+    axis.ticks = element_line(colour = "gray70"),
     plot.margin = margin(15, 15, 15, 15),
     axis.text = element_text(colour = "gray100")
-  ) 
+  )
 
 
 # Average -----------------------------------------------------------------
 
-colors <- c("Simple Moving Average 3" = "orange",
-            "Double Moving Average 3" = "steelblue",
-            "Weighted Moving Average 3" = "red")
+colors <- c(
+  "Simple Moving Average 3" = "orange",
+  "Double Moving Average 3" = "steelblue",
+  "Weighted Moving Average 3" = "red"
+)
 
-r_ma[[1]] %>% 
+r_ma[[1]] %>%
   ggplot(aes(date, jb)) +
   geom_line(
     lwd = 1.1,
@@ -101,16 +107,20 @@ r_ma[[1]] %>%
   theme(
     plot.title.position = "plot",
     text = element_text(colour = "gray100"),
-    plot.title = element_text(family = "Arial", face = "bold",
-                              colour = "white", size = rel(1.75)),
-    plot.subtitle = element_text(family = "Arial",
-                                 colour = "white", size = rel(1.25)),
+    plot.title = element_text(
+      family = "Arial", face = "bold",
+      colour = "white", size = rel(1.75)
+    ),
+    plot.subtitle = element_text(
+      family = "Arial",
+      colour = "white", size = rel(1.25)
+    ),
     axis.title.y = element_text(hjust = 1, colour = "gray100"),
     axis.line = element_line(colour = "gray70"),
-    axis.ticks = element_line(colour = 'gray70'),
+    axis.ticks = element_line(colour = "gray70"),
     plot.margin = margin(15, 15, 15, 15),
     axis.text = element_text(colour = "gray100")
-  ) 
+  )
 
 
 
@@ -160,16 +170,20 @@ autoplot(jb, lwd = 1, colour = "white") +
   theme(
     plot.title.position = "plot",
     text = element_text(colour = "gray100"),
-    plot.title = element_text(family = "Arial", face = "bold",
-                              colour = "white", size = rel(1.75)),
-    plot.subtitle = element_text(family = "Arial",
-                                 colour = "white", size = rel(1.25)),
+    plot.title = element_text(
+      family = "Arial", face = "bold",
+      colour = "white", size = rel(1.75)
+    ),
+    plot.subtitle = element_text(
+      family = "Arial",
+      colour = "white", size = rel(1.25)
+    ),
     axis.title.y = element_text(hjust = 1, colour = "gray100"),
     axis.line = element_line(colour = "gray70"),
-    axis.ticks = element_line(colour = 'gray70'),
+    axis.ticks = element_line(colour = "gray70"),
     plot.margin = margin(15, 15, 15, 15),
     axis.text = element_text(colour = "gray100")
-  ) 
+  )
 
 
 
@@ -179,9 +193,11 @@ autoplot(jb, lwd = 1, colour = "white") +
 # All ---------------------------------------------------------------------
 windowsFonts("Fira Code" = windowsFont("Fira Code"))
 
-metode = c("Naive", "Seasonal Naive", "Moving Average 3",
-           "Double Moving Average 3", "Weighted Moving Average", 
-           "Single Exponential", "Holt's Method", "Winter's Method")
+metode <- c(
+  "Naive", "Seasonal Naive", "Moving Average 3",
+  "Double Moving Average 3", "Weighted Moving Average",
+  "Single Exponential", "Holt's Method", "Winter's Method"
+)
 
 s <- "2.935483871	93.62365591	19437.04301	14.5565
 39.69142857	126.8	30497.72571	17.9850
@@ -192,18 +208,18 @@ s <- "2.935483871	93.62365591	19437.04301	14.5565
 83.34318	6.727287	14826.37	13.6733
 77.71345	5.987974	13823.97	11.5200"
 
-jb_text <- 
-  read.table(textConnection(s), header = F) %>% 
-  `colnames<-`(c("Bias", "MAD", "MSE", "MAPE")) %>% 
+jb_text <-
+  read.table(textConnection(s), header = F) %>%
+  `colnames<-`(c("Bias", "MAD", "MSE", "MAPE")) %>%
   mutate(
     Method = metode,
     .before = Bias
-  ) %>% 
-  mutate(RMSE = sqrt(MSE), .keep = "unused", .before = MAPE) %>% 
-  mutate_at(2:5, ~number(.x, accuracy = 0.001)) %>% 
+  ) %>%
+  mutate(RMSE = sqrt(MSE), .keep = "unused", .before = MAPE) %>%
+  mutate_at(2:5, ~ number(.x, accuracy = 0.001)) %>%
   mutate(
     label = str_glue(
-    "
+      "
     **{Method}**<br><br>
     **Bias :** {Bias}<span style='color:gray60;'></span><br>
     **MAD. :** {MAD}<span style='color:gray60;'></span><br>
@@ -211,18 +227,18 @@ jb_text <-
     **MAPE :** {MAPE}<span style='color:gray60;'></span>
     "
     )
-  ) %>% 
-  filter(Method == "Winter's Method") %>% 
+  ) %>%
+  filter(Method == "Winter's Method") %>%
   pull(label)
 
-df_jb %>% 
-  filter(status == "forecast") %>% 
-  drop_na() %>% 
-  mutate(value = round(value, 2)) %>% 
-  as.data.frame() %>% 
+df_jb %>%
+  filter(status == "forecast") %>%
+  drop_na() %>%
+  mutate(value = round(value, 2)) %>%
+  as.data.frame() %>%
   pull(value)
 
-label = str_glue(
+label <- str_glue(
   "
     **Agt 2021 :** 962.87<span style='color:gray60;'></span><br>
     **Sep 2021 :** 967.31<span style='color:gray60;'></span><br>
@@ -232,27 +248,31 @@ label = str_glue(
     "
 )
 
-to_plot <- 
-  jb_ka %>% 
-  mutate(naive = as.vector(r_naive$fitted),
-         snaive = as.vector(r_snaive$fitted),
-         ma = r_ma[[1]]$fit,
-         dma = r_dma[[1]]$fit,
-         wma = r_wma[[1]]$fit,
-         se = as.vector(r_se$fitted),
-         holt = as.vector(r_holt$fitted),
-         winter = as.vector(r_winter$fitted)) %>% 
-  pivot_longer(-2) %>% 
-  mutate(metode = rep(c("Data", metode), 187)) %>% 
+to_plot <-
+  jb_ka %>%
+  mutate(
+    naive = as.vector(r_naive$fitted),
+    snaive = as.vector(r_snaive$fitted),
+    ma = r_ma[[1]]$fit,
+    dma = r_dma[[1]]$fit,
+    wma = r_wma[[1]]$fit,
+    se = as.vector(r_se$fitted),
+    holt = as.vector(r_holt$fitted),
+    winter = as.vector(r_winter$fitted)
+  ) %>%
+  pivot_longer(-2) %>%
+  mutate(metode = rep(c("Data", metode), 187)) %>%
   arrange(name, date)
 
 to_plot
 
 # viz
-df_jb <- 
-  jb_ka %>% 
-  mutate(winter = c(as.vector(r_winter$fitted)),
-         status = rep("actual", 187)) %>% 
+df_jb <-
+  jb_ka %>%
+  mutate(
+    winter = c(as.vector(r_winter$fitted)),
+    status = rep("actual", 187)
+  ) %>%
   rbind(
     .,
     data.frame(
@@ -260,11 +280,11 @@ df_jb <-
       date = seq.Date(as.Date("2021-08-01"), as.Date("2021-12-01"), by = "month"),
       winter = r_winter$mean,
       status = rep("forecast", 5)
-    ) 
-  ) %>% 
+    )
+  ) %>%
   pivot_longer(-c(2, 4))
 
-df_jb %>% 
+df_jb %>%
   ggplot(aes(date, value, colour = name, label = value)) +
   geom_line(
     lwd = 1
@@ -278,7 +298,7 @@ df_jb %>%
     color = "white",
     hjust = "right",
     vjust = "top",
-    direction = 'y',
+    direction = "y",
     nudge_x = 700,
     nudge_y = 200,
     segment.ncp = 3,
@@ -295,8 +315,10 @@ df_jb %>%
     caption = expression(italic("Sumber : bps.go.id"))
   ) +
   expand_limits(y = 0) +
-  coord_cartesian(clip = "off",
-                  xlim = c(as.Date("2005-10-01"), as.Date("2022-01-01"))) +
+  coord_cartesian(
+    clip = "off",
+    xlim = c(as.Date("2005-10-01"), as.Date("2022-01-01"))
+  ) +
   hrbrthemes::theme_ft_rc(
     base_family = "Fira Code",
     base_size = 13,
@@ -315,7 +337,7 @@ df_jb %>%
     y = 600,
     label = label,
     colour = "gray20",
-    #fill = NA, 
+    # fill = NA,
     family = "Fira Code",
     lineheight = 1,
     size = 5,
@@ -330,16 +352,20 @@ df_jb %>%
     plot.title.position = "plot",
     panel.spacing.x = unit(2, "lines"),
     text = element_text(colour = "gray100"),
-    plot.title = element_text(family = "Fira Code", face = "bold",
-                              colour = "palegreen", size = rel(1.75)),
-    plot.subtitle = element_text(family = "Fira Code",
-                                 colour = "white", size = rel(1.25)),
+    plot.title = element_text(
+      family = "Fira Code", face = "bold",
+      colour = "palegreen", size = rel(1.75)
+    ),
+    plot.subtitle = element_text(
+      family = "Fira Code",
+      colour = "white", size = rel(1.25)
+    ),
     axis.title.y = element_text(hjust = 1, colour = "gray100"),
     axis.line = element_line(colour = "gray50"),
-    axis.ticks = element_line(colour = 'gray50'),
+    axis.ticks = element_line(colour = "gray50"),
     plot.margin = margin(15, 50, 15, 5), # ats kanan bawah kiri
     axis.text = element_text(colour = "gray100")
-  ) 
+  )
 
 
 ggsave(
@@ -353,109 +379,115 @@ ggsave(
 
 # Make all plot -----------------------------------------------------------
 
-to_plot %>% 
-  split(.$metode) %>% 
+to_plot %>%
+  split(.$metode) %>%
   walk2(
-      .x = .,
-      .y = names(.),
-      ~ {
-        message("Generating plot for ", .y)
-        # -------------------------------------------
-        jb_text <- 
-          read.table(textConnection(s), header = F) %>% 
-          `colnames<-`(c("Bias", "MAD", "MSE", "MAPE")) %>% 
-          mutate(
-            Method = metode,
-            .before = Bias
-          ) %>% 
-          mutate(RMSE = sqrt(MSE), .keep = "unused", .before = MAPE) %>% 
-          mutate_at(2:5, ~number(.x, accuracy = 0.001)) %>% 
-          mutate(
-            label = str_glue(
-              "
+    .x = .,
+    .y = names(.),
+    ~ {
+      message("Generating plot for ", .y)
+      # -------------------------------------------
+      jb_text <-
+        read.table(textConnection(s), header = F) %>%
+        `colnames<-`(c("Bias", "MAD", "MSE", "MAPE")) %>%
+        mutate(
+          Method = metode,
+          .before = Bias
+        ) %>%
+        mutate(RMSE = sqrt(MSE), .keep = "unused", .before = MAPE) %>%
+        mutate_at(2:5, ~ number(.x, accuracy = 0.001)) %>%
+        mutate(
+          label = str_glue(
+            "
     **{Method}**<br><br>
     **Bias :** {Bias}<span style='color:gray60;'></span><br>
     **MAD. :** {MAD}<span style='color:gray60;'></span><br>
     **RMSE :** {RMSE}<span style='color:gray60;'></span><br>
     **MAPE :** {MAPE}<span style='color:gray60;'></span>
     "
-            )
-          ) %>% 
-          filter(Method == .y) %>% 
-          pull(label)
-        
-        # -------------------------------------------
-        plot_hasil <- 
-          to_plot %>% 
-          ggplot(aes(date, value, colour = metode)) +
-          #geom_line(lwd = 1.1, colour = "white") +
-          geom_line(
-            data = to_plot %>% 
-              filter(metode %in% c("Data", .y)),
-            lwd = 1
-          ) +
-          labs(
-            x = NULL,
-            y = "Ribu (Ton)",
-            color = NULL,
-            title = "Jumlah Barang Melalui Transportasi Kereta Api",
-            subtitle = "Pulau Jawa Tahun 2006-2021",
-            caption = expression(italic("Sumber : bps.go.id"))
-          ) +
-          expand_limits(y = 0) +
-          coord_cartesian(clip = "off",
-                          xlim = c(as.Date("2005-10-01"), as.Date("2022-01-01"))) +
-          hrbrthemes::theme_ft_rc(
-            base_family = "Fira Code",
-            base_size = 13,
-            grid = "XY",
-            ticks = T
-          ) +
-          scale_x_date(
-            expand = expansion(mult = c(0, 0.05))
-          ) +
-          annotate(
-            geom = "richtext",
-            x = as.Date.character("2023-08-01"),
-            y = 700,
-            label = jb_text,
-            colour = "gray20",
-            #fill = NA, 
+          )
+        ) %>%
+        filter(Method == .y) %>%
+        pull(label)
+
+      # -------------------------------------------
+      plot_hasil <-
+        to_plot %>%
+        ggplot(aes(date, value, colour = metode)) +
+        # geom_line(lwd = 1.1, colour = "white") +
+        geom_line(
+          data = to_plot %>%
+            filter(metode %in% c("Data", .y)),
+          lwd = 1
+        ) +
+        labs(
+          x = NULL,
+          y = "Ribu (Ton)",
+          color = NULL,
+          title = "Jumlah Barang Melalui Transportasi Kereta Api",
+          subtitle = "Pulau Jawa Tahun 2006-2021",
+          caption = expression(italic("Sumber : bps.go.id"))
+        ) +
+        expand_limits(y = 0) +
+        coord_cartesian(
+          clip = "off",
+          xlim = c(as.Date("2005-10-01"), as.Date("2022-01-01"))
+        ) +
+        hrbrthemes::theme_ft_rc(
+          base_family = "Fira Code",
+          base_size = 13,
+          grid = "XY",
+          ticks = T
+        ) +
+        scale_x_date(
+          expand = expansion(mult = c(0, 0.05))
+        ) +
+        annotate(
+          geom = "richtext",
+          x = as.Date.character("2023-08-01"),
+          y = 700,
+          label = jb_text,
+          colour = "gray20",
+          # fill = NA,
+          family = "Fira Code",
+          lineheight = 1,
+          size = 5,
+          hjust = 0,
+          vjust = 1,
+          label.size = NA,
+          size = 6
+        ) +
+        theme(
+          plot.caption = element_text(size = 12),
+          legend.justification = "top",
+          plot.title.position = "plot",
+          panel.spacing.x = unit(2, "lines"),
+          text = element_text(colour = "gray100"),
+          plot.title = element_text(
+            family = "Fira Code", face = "bold",
+            colour = "palegreen", size = rel(1.75)
+          ),
+          plot.subtitle = element_text(
             family = "Fira Code",
-            lineheight = 1,
-            size = 5,
-            hjust = 0,
-            vjust = 1,
-            label.size = NA,
-            size = 6
-          ) +
-          theme(
-            plot.caption = element_text(size = 12),
-            legend.justification = "top",
-            plot.title.position = "plot",
-            panel.spacing.x = unit(2, "lines"),
-            text = element_text(colour = "gray100"),
-            plot.title = element_text(family = "Fira Code", face = "bold",
-                                      colour = "palegreen", size = rel(1.75)),
-            plot.subtitle = element_text(family = "Fira Code",
-                                         colour = "white", size = rel(1.25)),
-            axis.title.y = element_text(hjust = 1, colour = "gray100"),
-            axis.line = element_line(colour = "gray50"),
-            axis.ticks = element_line(colour = 'gray50'),
-            plot.margin = margin(15, 50, 15, 5), # ats kanan bawah kiri
-            axis.text = element_text(colour = "gray100")
-          ) 
-        # ------------------------
-        ggsave(
-          str_glue("~/Main R/outfile/{.y}.png"),
-          width = 10,
-          height = 5,
-          limitsize = F,
-          dpi = 300,
-          type = "cairo-png"
+            colour = "white", size = rel(1.25)
+          ),
+          axis.title.y = element_text(hjust = 1, colour = "gray100"),
+          axis.line = element_line(colour = "gray50"),
+          axis.ticks = element_line(colour = "gray50"),
+          plot.margin = margin(15, 50, 15, 5), # ats kanan bawah kiri
+          axis.text = element_text(colour = "gray100")
         )
-        # -----------------------
-      }
+      # ------------------------
+      ggsave(
+        str_glue("~/Main R/outfile/{.y}.png"),
+        width = 10,
+        height = 5,
+        limitsize = F,
+        dpi = 300,
+        type = "cairo-png"
+      )
+      # -----------------------
+    }
   )
 
 library(magick)
@@ -465,4 +497,3 @@ imgs <- image_join(all_image)
 gif <- image_animate(imgs, 1, loop = 1)
 # simpan
 image_write_gif(gif, "~/Main R/outfile/smoothing.gif")
-

@@ -4,17 +4,17 @@
 # ada s3, s4 dan ref class
 
 karyawan <- setRefClass("karyawan",
-                        fields = list(nama = "character", gaji = "numeric", jabatan = "character"),
-                        methods = list(
-                          tambahgaji = function(p){
-                            gaji <<- gaji + p
-                          },
-                          
-                          potonggaji = function(p){
-                            gaji <<- gaji - p
-                          }
-                        )
-                        )
+  fields = list(nama = "character", gaji = "numeric", jabatan = "character"),
+  methods = list(
+    tambahgaji = function(p) {
+      gaji <<- gaji + p
+    },
+
+    potonggaji = function(p) {
+      gaji <<- gaji - p
+    }
+  )
+)
 
 ridson <- karyawan(nama = "ridson", gaji = 10, jabatan = "Data Scientis")
 

@@ -50,7 +50,7 @@ obj_size(1:1e9)
 # c selalu atomic
 c(c(1, 2), c(3, 4))
 
-NA ^ 0
+NA^0
 NA | TRUE
 NA & FALSE
 
@@ -147,10 +147,10 @@ x_option <- function(x) {
 
 x_option <- function(x) {
   switch(x,
-         a = "option 1",
-         b = "option 2",
-         c = "option 3",
-         stop("Invalid `x` value")
+    a = "option 1",
+    b = "option 2",
+    c = "option 3",
+    stop("Invalid `x` value")
   )
 }
 # The last component of a switch() should always throw an error,
@@ -159,19 +159,19 @@ x_option <- function(x) {
 
 legs <- function(x) {
   switch(x,
-         cow = ,
-         horse = ,
-         dog = 4,
-         human = ,
-         chicken = 2,
-         plant = 0,
-         stop("Unknown input")
+    cow = ,
+    horse = ,
+    dog = 4,
+    human = ,
+    chicken = 2,
+    plant = 0,
+    stop("Unknown input")
   )
 }
 legs("cow")
-#> [1] 4
+# > [1] 4
 legs("dog")
-#> [1] 4
+# > [1] 4
 
 
 # loop --------------------------------------------------------------------
@@ -219,13 +219,13 @@ funs <- Filter(is.function, objs)
 
 formals(funs$abbreviate) %>% length()
 
-sapply(funs, function(x){
+sapply(funs, function(x) {
   formals(x) %>% length()
 }) %>%
   as.data.frame() %>%
   rownames_to_column() %>%
   as_tibble() %>%
-  `colnames<-`(c('fun', 'nargs')) %>%
+  `colnames<-`(c("fun", "nargs")) %>%
   arrange(-nargs)
 
 
@@ -270,16 +270,16 @@ cleanup <- function(dir, code) {
 
 # fungsi jahat
 `(` <- function(e1) {
-  if (is.numeric(e1)){
+  if (is.numeric(e1)) {
     e1 + 1
   } else {
     e1
   }
 }
 
-(122+1)
-rm('(')
-(122+1)
+(122 + 1)
+rm("(")
+(122 + 1)
 
 
 # S3 ----------------------------------------------------------------------
@@ -297,7 +297,7 @@ class(x) <- LETTERS
 
 
 # contoh ------------------------------------------------------------------
-rata2 <- function (x, ...) {
+rata2 <- function(x, ...) {
   UseMethod("rata2", x)
 }
 
@@ -306,11 +306,11 @@ rata2.b <- function(x, ...) sapply(x, mean, ...)
 rata2.c <- function(x, ...) apply(x, 2, mean)
 
 x <- iris[-5]
-class(x) <- 'b'
+class(x) <- "b"
 x
 
 rata2(x)
-methods('rata2')
+methods("rata2")
 
 
 
@@ -347,13 +347,13 @@ baz(db)
 XXX <- function(...) {}
 is.XXX <- function(x) inherits(x, "XXX")
 
-class(x) <- 'X'
+class(x) <- "X"
 is.XXX(x)
-class(x) <- 'XXX'
+class(x) <- "XXX"
 is.XXX(x)
 
 
 # penerapan
-print.XXX <- function(x, ...) cat(format('ini kelas XXX', ...), "\n")
-class(x) <- 'XXX'
+print.XXX <- function(x, ...) cat(format("ini kelas XXX", ...), "\n")
+class(x) <- "XXX"
 print(x)

@@ -12,17 +12,17 @@ drive_auth(
 
 drive_ls(n_max = 2)
 
-folder = drive_get("Aksara Jawa/train")
+folder <- drive_get("Aksara Jawa/train")
 folder
 folder$id
 
 drive_find(id = folder$id)
 
-f = drive_get(id = folder$id) %>% view()
+f <- drive_get(id = folder$id) %>% view()
 
 
 
-img = drive_get("Aksara Jawa/train/ba/ba.0.jpg")
+img <- drive_get("Aksara Jawa/train/ba/ba.0.jpg")
 img$id
 
 drive_get(id = img$id)

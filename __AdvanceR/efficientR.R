@@ -1,26 +1,28 @@
 library(microbenchmark)
 
-df = iris
-microbenchmark(df[1, 3],
-               df$Sepal.Length[3], # tercepat
-               df[1, 'Sepal.Length'])
+df <- iris
+microbenchmark(
+  df[1, 3],
+  df$Sepal.Length[3], # tercepat
+  df[1, "Sepal.Length"]
+)
 
 
-x = 1:100 # initiate vector to cumulatively sum
+x <- 1:100 # initiate vector to cumulatively sum
 # Method 1: with a for loop (10 lines)
-cs_for = function(x){
-  for(i in x){
-    if(i == 1){
-      xc = x[i]
+cs_for <- function(x) {
+  for (i in x) {
+    if (i == 1) {
+      xc <- x[i]
     } else {
-      xc = c(xc, sum(x[1:i]))
+      xc <- c(xc, sum(x[1:i]))
     }
   }
   xc
 }
 
 # Method 2: with apply (3 lines)
-cs_apply = function(x){
+cs_apply <- function(x) {
   sapply(x, function(x) sum(1:x))
 }
 
@@ -33,19 +35,19 @@ file.edit("~/.Rprofile")
 options(prompt = "R> ", digits = 4, show.signif.stars = F, continue = "  ")
 
 
-good = try(1 + 1, silent = TRUE)
-bad = try(1 + "1", silent = TRUE)
-if(class(bad) == "try-error") print('a')
+good <- try(1 + 1, silent = TRUE)
+bad <- try(1 + "1", silent = TRUE)
+if (class(bad) == "try-error") print("a")
 
 
-inst = lapply(pkgs, library, character.only = TRUE)
+inst <- lapply(pkgs, library, character.only = TRUE)
 
 
 
 
 # shiny -------------------------------------------------------------------
 
-devtools::install_github('rstudio/profvis')
+devtools::install_github("rstudio/profvis")
 
 library(profvis)
 
@@ -54,8 +56,8 @@ profvis({
 })
 
 expensive_function <- function(x) {
-  sum((1:x) ^ 2)
-  Sys.sleep(5)    # make it seem to take even longer
+  sum((1:x)^2)
+  Sys.sleep(5) # make it seem to take even longer
 }
 
 library(memoise)

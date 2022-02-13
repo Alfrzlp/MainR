@@ -1,4 +1,4 @@
-87.00*0.3 + 0.35*(92.00	+ 87.00)
+87.00 * 0.3 + 0.35 * (92.00 + 87.00)
 # Load Package ------------------------------------------------------------
 
 library(tidyverse)
@@ -10,21 +10,21 @@ windowsFonts("Fira Code" = windowsFont("Fira Code"))
 windowsFonts("Lato" = windowsFont("Lato"))
 
 
-datasaurus_dozen %>% 
-  distinct(dataset) %>% 
-  pull
+datasaurus_dozen %>%
+  distinct(dataset) %>%
+  pull()
 
 
 # Annotation --------------------------------------------------------------
-summary_annotation <- 
-  datasaurus_dozen %>% 
+summary_annotation <-
+  datasaurus_dozen %>%
   filter(dataset == "dino") %>%
   summarise(
     across(c(x, y), list(avg = mean, std = sd)),
     r = cor(x, y)
-  ) %>% 
+  ) %>%
   mutate(
-    across(everything(), ~number(.x, accuracy = 0.01)),
+    across(everything(), ~ number(.x, accuracy = 0.01)),
     label = str_glue(
       "
       Mean. X: {x_avg}
@@ -34,13 +34,13 @@ summary_annotation <-
       Corr.  : {r}
       "
     )
-  ) %>% 
+  ) %>%
   pull(label)
 
 
-plot_dino <- 
-  datasaurus_dozen %>% 
-  filter(dataset == "dino") %>% 
+plot_dino <-
+  datasaurus_dozen %>%
+  filter(dataset == "dino") %>%
   ggplot(aes(x, y)) +
   geom_point(colour = "greenyellow") +
   annotate(
@@ -76,7 +76,7 @@ plot_dino <-
     base_family = "Fira Code",
     grid = "XY",
     ticks = T
-  ) 
+  )
 
 
 ggsave(
@@ -91,24 +91,23 @@ ggsave(
 
 # Viz ---------------------------------------------------------------------
 
-datasaurus_dozen %>% 
-  split(.$dataset) %>% 
+datasaurus_dozen %>%
+  split(.$dataset) %>%
   walk2(
     .x = .,
     .y = names(.),
     ~ {
-      
       message("Generating plot for ", .y)
-      
-      summary_annotation <- 
-        .x %>% 
+
+      summary_annotation <-
+        .x %>%
         filter(dataset == .y) %>%
         summarise(
           across(c(x, y), list(avg = mean, std = sd)),
           r = cor(x, y)
-        ) %>% 
+        ) %>%
         mutate(
-          across(everything(), ~number(.x, accuracy = 0.01)),
+          across(everything(), ~ number(.x, accuracy = 0.01)),
           label = str_glue(
             "
       Mean. X: {x_avg}
@@ -118,13 +117,13 @@ datasaurus_dozen %>%
       Corr.  : {r}
       "
           )
-        ) %>% 
+        ) %>%
         pull(label)
-      
-      
-      plot_dino <- 
-        .x %>% 
-        filter(dataset == .y) %>% 
+
+
+      plot_dino <-
+        .x %>%
+        filter(dataset == .y) %>%
         ggplot(aes(x, y)) +
         geom_point(colour = "greenyellow") +
         annotate(
@@ -155,14 +154,14 @@ datasaurus_dozen %>%
           x = NULL, y = NULL,
           title = "Datasaurus Dozen",
           subtitle = str_glue("Datasets : {str_to_title(.y)}")
-        ) + 
+        ) +
         theme_ft_rc(
           base_family = "Fira Code",
           grid = "XY",
           ticks = T
-        ) 
-      
-      
+        )
+
+
       ggsave(
         filename = str_glue("Plot Dino/{janitor::make_clean_names(.y)}.png"),
         plot = plot_dino,
@@ -173,4 +172,3 @@ datasaurus_dozen %>%
       )
     }
   )
-

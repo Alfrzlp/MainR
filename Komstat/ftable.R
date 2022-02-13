@@ -9,8 +9,10 @@ x
 ftable(x, row.vars = c(2, 4))
 
 ## Start with expressions, use table()'s "dnn" to change labels
-ftable(mtcars$cyl, mtcars$vs, mtcars$am, mtcars$gear, row.vars = c(2, 4),
-       dnn = c("Cylinders", "V/S", "Transmission", "Gears"))
+ftable(mtcars$cyl, mtcars$vs, mtcars$am, mtcars$gear,
+  row.vars = c(2, 4),
+  dnn = c("Cylinders", "V/S", "Transmission", "Gears")
+)
 
 
 
@@ -19,12 +21,13 @@ ftable(mtcars$cyl, mtcars$vs, mtcars$am, mtcars$gear, row.vars = c(2, 4),
 ## Not in ftable standard format, but o.k.
 file <- tempfile()
 cat("             Intercourse\n",
-    "Race  Gender     Yes  No\n",
-    "White Male        43 134\n",
-    "      Female      26 149\n",
-    "Black Male        29  23\n",
-    "      Female      22  36\n",
-    file = file)
+  "Race  Gender     Yes  No\n",
+  "White Male        43 134\n",
+  "      Female      26 149\n",
+  "Black Male        29  23\n",
+  "      Female      22  36\n",
+  file = file
+)
 # }
 # NOT RUN {
 file.show(file)
@@ -38,27 +41,30 @@ unlink(file)
 ## Almost o.k., but misses the name of the row variable.
 file <- tempfile()
 cat("                      \"Tonsil Size\"\n",
-    "            \"Not Enl.\" \"Enl.\" \"Greatly Enl.\"\n",
-    "Noncarriers       497     560           269\n",
-    "Carriers           19      29            24\n",
-    file = file)
+  "            \"Not Enl.\" \"Enl.\" \"Greatly Enl.\"\n",
+  "Noncarriers       497     560           269\n",
+  "Carriers           19      29            24\n",
+  file = file
+)
 # }
 # NOT RUN {
 file.show(file)
 # }
 # NOT RUN {
-ft <- read.ftable(file, skip = 2,
-                  row.var.names = "Status",
-                  col.vars = list("Tonsil Size" =
-                                    c("Not Enl.", "Enl.", "Greatly Enl.")))
+ft <- read.ftable(file,
+  skip = 2,
+  row.var.names = "Status",
+  col.vars = list(
+    "Tonsil Size" =
+      c("Not Enl.", "Enl.", "Greatly Enl.")
+  )
+)
 ft
 unlink(file)
 
 ft22 <- ftable(Titanic, row.vars = 2:1, col.vars = 4:3)
 write.ftable(ft22, quote = FALSE)
-write.ftable(ft22, quote = FALSE, method="row.compact")
-write.ftable(ft22, quote = FALSE, method="col.compact")
-write.ftable(ft22, quote = FALSE, method="compact")
+write.ftable(ft22, quote = FALSE, method = "row.compact")
+write.ftable(ft22, quote = FALSE, method = "col.compact")
+write.ftable(ft22, quote = FALSE, method = "compact")
 # }
-
-

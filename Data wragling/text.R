@@ -1,4 +1,4 @@
-data = "1 8,5 6,6
+data <- "1 8,5 6,6
 2 9,1 7,9
 3 9,6 6,9
 4 9,3 7,6
@@ -9,20 +9,24 @@ data = "1 8,5 6,6
 9 7,0 6,2
 10 7,2 6,8"
 
-str.to.df <- function(str, pemisah=" ", dim, koma=T){
+str.to.df <- function(str, pemisah = " ", dim, koma = T) {
   library(stringr)
   library(dplyr)
-  
-  if(koma) str = str_replace_all(str, ",", ".")
-  
-  str = str_replace_all(str, "\n", ",")
-  str = str_replace_all(str, pemisah, ",")
-  str = str_split(str, ",", simplify = T)
-  str = data.frame(matrix(str, nrow = dim[1], ncol=dim[2], byrow = T))
-  
-  for(i in 1:ncol(str)){
-    tryCatch({str[,i] = as.numeric(str[,i])}, 
-             warning = function(a) str[,i] = str[,i])
+
+  if (koma) str <- str_replace_all(str, ",", ".")
+
+  str <- str_replace_all(str, "\n", ",")
+  str <- str_replace_all(str, pemisah, ",")
+  str <- str_split(str, ",", simplify = T)
+  str <- data.frame(matrix(str, nrow = dim[1], ncol = dim[2], byrow = T))
+
+  for (i in 1:ncol(str)) {
+    tryCatch(
+      {
+        str[, i] <- as.numeric(str[, i])
+      },
+      warning = function(a) str[, i] <- str[, i]
+    )
   }
   return(str)
 }
@@ -31,12 +35,12 @@ str.to.df <- function(str, pemisah=" ", dim, koma=T){
 
 
 
-str2vec <- function(str, adakoma = T, pemisah = "\\s"){
-  str = gsub(",", ".", str)
-  str = gsub(paste0(pemisah, "|\t|\n"), " ", str)
-  str = str_split(str, pattern = " ")[[1]]
+str2vec <- function(str, adakoma = T, pemisah = "\\s") {
+  str <- gsub(",", ".", str)
+  str <- gsub(paste0(pemisah, "|\t|\n"), " ", str)
+  str <- str_split(str, pattern = " ")[[1]]
   # ambil yang ada angka dan ubah jadi numeric
-  vec = as.numeric(str[str_detect(str, "[:alnum:]")])
+  vec <- as.numeric(str[str_detect(str, "[:alnum:]")])
   return(vec)
 }
 
@@ -44,22 +48,22 @@ str2vec <- function(str, adakoma = T, pemisah = "\\s"){
 
 
 
-str = "aku 1927 awakmu? ddd dd ddd"
+str <- "aku 1927 awakmu? ddd dd ddd"
 
 str_remove_all(str, "\\d")
 str_remove(str, "\\d{4}")
-#hapus digit dengan jumlah antara 1 2
+# hapus digit dengan jumlah antara 1 2
 str_remove(str, "\\d{1,2}")
-#lebih dari 1
+# lebih dari 1
 str_remove(str, "\\d{1,}")
 str_remove(str, "\\d{5,}")
 
-#hapus selain angka
+# hapus selain angka
 str_remove_all(str, "\\D")
 
 
 # hapus spasi awal akhir
-df = df %>% 
+df <- df %>%
   mutate(nama = stringi::stri_trim_both(nama))
 
 # deteksi akhir
@@ -79,7 +83,7 @@ str_detect("ira rap", "^ir\\s")
 # {n, } pas n atau lebih
 # {n, m} pas antara n m
 # ?? 0 atau 1 prefer 0
-# 
+#
 string <- "http:"
 str_detect(string, "https?:")
 
@@ -97,10 +101,12 @@ trimws(x)
 # extrak ------------------------------------------------------------------
 library(tidyverse)
 
-data.frame(nama = c("D:apalah ini kalau/bahan-kue/puding/Aceh.csv")) %>% 
-  extract(nama, into = c("a", "b", "c"),
-          regex = ".*/(.*)/(.*)/(.*)\\.csv$",
-          remove = F)
+data.frame(nama = c("D:apalah ini kalau/bahan-kue/puding/Aceh.csv")) %>%
+  extract(nama,
+    into = c("a", "b", "c"),
+    regex = ".*/(.*)/(.*)/(.*)\\.csv$",
+    remove = F
+  )
 
 
 # Text --------------------------------------------------------------------
@@ -194,21 +200,23 @@ s <- "1. Diva - Malang - Man 2 kota mlg
 
 
 # olah text ---------------------------------------------------------------
-s %>% 
-  str_split("\n") %>% 
-  unlist() %>% 
-  as_tibble_col(column_name = "nama") %>% 
-  separate(nama, c("nama", "kota", "asal_sekolah"), sep = "-") %>% 
-  mutate(nama = str_remove_all(nama, "\\d|[:punct:]"),
-         kota = str_trim(kota),
-         asal_sekolah = str_trim(asal_sekolah)) %>% 
+s %>%
+  str_split("\n") %>%
+  unlist() %>%
+  as_tibble_col(column_name = "nama") %>%
+  separate(nama, c("nama", "kota", "asal_sekolah"), sep = "-") %>%
+  mutate(
+    nama = str_remove_all(nama, "\\d|[:punct:]"),
+    kota = str_trim(kota),
+    asal_sekolah = str_trim(asal_sekolah)
+  ) %>%
   filter((row_number() == 21) | (between(row_number(), 1, 6)))
 as.data.frame()
 
 
 # contoh ------------------------------------------------------------------
 
-s <- '1. Aceh 2 349 3 746
+s <- "1. Aceh 2 349 3 746
 2. Sumatera Utara 6 189 5 408
 3. Sumatera Barat 3 009 2 960
 4. Riau 1 734 1 446
@@ -241,19 +249,23 @@ s <- '1. Aceh 2 349 3 746
 31. Maluku 408 319
 32. Maluku Utara 271 202
 33. Papua Barat 475 805
-34. Papua 1 492 365'
+34. Papua 1 492 365"
 
-data.frame(s = str_split(s, '\n')[[1]]) %>% 
-  extract(s, into = c('a', 'b', 'c', 'd'),
-          regex = '^(\\d+)\\.\\s(\\D+)\\s(\\d{1,3}\\s\\d+|\\d+)\\s(\\d{1,3}\\s\\d+|\\d+)') %>% 
-  mutate_at(3:4, ~ gsub('\\s', '', .x)) %>% 
-  type_convert() %>% 
-  select(-a) %>% 
-  mutate(p = (d-c)*100/c)
+data.frame(s = str_split(s, "\n")[[1]]) %>%
+  extract(s,
+    into = c("a", "b", "c", "d"),
+    regex = "^(\\d+)\\.\\s(\\D+)\\s(\\d{1,3}\\s\\d+|\\d+)\\s(\\d{1,3}\\s\\d+|\\d+)"
+  ) %>%
+  mutate_at(3:4, ~ gsub("\\s", "", .x)) %>%
+  type_convert() %>%
+  select(-a) %>%
+  mutate(p = (d - c) * 100 / c)
 
 # Digit koma, -, tanpa angka depan
 # -?\\d*?\\.\\d*
 # Kelmahan - 111.2 jika terpisah spasi atau pakai ,
 
-str_extract_all('aaa -.12 -1.000 111 1.2 -111 -111.2',
-                '(-?\\d*?\\.\\d*|-?\\d+)')
+str_extract_all(
+  "aaa -.12 -1.000 111 1.2 -111 -111.2",
+  "(-?\\d*?\\.\\d*|-?\\d+)"
+)

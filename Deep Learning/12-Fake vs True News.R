@@ -1,7 +1,7 @@
 
 
-fake = read.csv("D:/Datasets/NLP/Berita/Fake.csv")
-true = read.csv("D:/Datasets/NLP/Berita/True.csv")
+fake <- read.csv("D:/Datasets/NLP/Berita/Fake.csv")
+true <- read.csv("D:/Datasets/NLP/Berita/True.csv")
 
 dim(fake)
 dim(true)

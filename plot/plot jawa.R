@@ -1,99 +1,107 @@
 
 library(rgdal)
-#nama shp jawa
+# nama shp jawa
 
 jawa <- readOGR(dsn = "D:/Datasets/Map of Jawa (original)", layer = "jawa")
 
-#plot dengan base plot
-#lwd tebal garis 
-plot(jawa, col="black", bg="skyblue", border="white", lwd=0.25)
+# plot dengan base plot
+# lwd tebal garis
+plot(jawa, col = "black", bg = "skyblue", border = "white", lwd = 0.25)
 
-#Menggubah data geo spatial menjadi data.frame
+# Menggubah data geo spatial menjadi data.frame
 library(broom)
 jawabaru <- tidy(jawa)
 
-#membuat df berisi nama kab, prov dan id
-dfkab = data.frame(jawa@data$NAMA_KAB, jawa@data$NAMA_PROP)
+# membuat df berisi nama kab, prov dan id
+dfkab <- data.frame(jawa@data$NAMA_KAB, jawa@data$NAMA_PROP)
 names(dfkab) <- c("kabupaten", "provinsi")
-dfkab$id <- seq(0, nrow(dfkab)-1)
+dfkab$id <- seq(0, nrow(dfkab) - 1)
 
-#join df jawabaru dengan df berisi nama kab, prov, id
+# join df jawabaru dengan df berisi nama kab, prov, id
 library(dplyr)
-#id di jawa baru berupa chr
+# id di jawa baru berupa chr
 jawabaru <- jawabaru %>% mutate(id = as.numeric(id))
-jawabaru <- left_join(jawabaru, dfkab, by="id")
+jawabaru <- left_join(jawabaru, dfkab, by = "id")
 
-#===============================================================================
-#menghapus '(city)' dalam nama kab, menggantinya dengan Kota
-#contoh Batu (City) --> Kota Batu
+# ===============================================================================
+# menghapus '(city)' dalam nama kab, menggantinya dengan Kota
+# contoh Batu (City) --> Kota Batu
 library(stringr)
-jawabaru <- jawabaru %>% dplyr::mutate(kabupaten = if_else(str_sub(kabupaten, start = -6)=="(City)", 
-                                                             paste("Kota",str_sub(kabupaten, 1, (nchar(kabupaten)-7))), kabupaten))
+jawabaru <- jawabaru %>% dplyr::mutate(kabupaten = if_else(str_sub(kabupaten, start = -6) == "(City)",
+  paste("Kota", str_sub(kabupaten, 1, (nchar(kabupaten) - 7))), kabupaten
+))
 
 head(jawabaru)
 
-#membersihkan nama
+# membersihkan nama
 library(janitor)
 jawabaru <- clean_names(jawabaru)
-#===============================================================================
-#membuat lokasi nama kabupaten
-nama <- jawabaru %>% group_by(kabupaten) %>% 
+# ===============================================================================
+# membuat lokasi nama kabupaten
+nama <- jawabaru %>%
+  group_by(kabupaten) %>%
   summarise(long = mean(long), lat = mean(lat))
 head(nama)
 
 library(ggplot2)
-ggplot(jawabaru, aes(x=long, y=lat)) + 
-  geom_map(map=jawabaru, aes(map_id=id, fill=provinsi), color="white", size=0.5) +
-  geom_text(aes(x=long, y=lat, label = kabupaten), data=nama, size=1.5) +
+ggplot(jawabaru, aes(x = long, y = lat)) +
+  geom_map(map = jawabaru, aes(map_id = id, fill = provinsi), color = "white", size = 0.5) +
+  geom_text(aes(x = long, y = lat, label = kabupaten), data = nama, size = 1.5) +
   scale_fill_viridis_d(option = "E") +
   theme(legend.position = "none")
 
-#===============================================================================
-#Memisahkan jawa timur
+# ===============================================================================
+# Memisahkan jawa timur
 jawatimur <- jawabaru %>% filter(provinsi == "Jawa Timur")
 
-#Membuat posisi nama kab
-nama <- jawatimur %>% group_by(kabupaten) %>% 
+# Membuat posisi nama kab
+nama <- jawatimur %>%
+  group_by(kabupaten) %>%
   summarise(long = median(long), lat = median(lat))
 
-#Plot
-ggplot(jawatimur, aes(x=long, y=lat)) + 
-  geom_map(map=jawatimur, aes( map_id=id, fill=kabupaten), color="white", size=0.5) +
-  geom_text(aes(x=long, y=lat, label = kabupaten), data=nama, size=3) +
-  ylim(NA, -6.4) + xlim(NA, 116) +
+# Plot
+ggplot(jawatimur, aes(x = long, y = lat)) +
+  geom_map(map = jawatimur, aes(map_id = id, fill = kabupaten), color = "white", size = 0.5) +
+  geom_text(aes(x = long, y = lat, label = kabupaten), data = nama, size = 3) +
+  ylim(NA, -6.4) +
+  xlim(NA, 116) +
   scale_fill_viridis_d(option = "D") +
   theme(legend.position = "none")
 
-#gabung dgn data hutan jawa timur
+# gabung dgn data hutan jawa timur
 hutan <- read.csv("D:/Datasets/kebun_jatim.csv", sep = ";")
 
-jawatimur <- left_join(jawatimur, hutan, by="kabupaten")
+jawatimur <- left_join(jawatimur, hutan, by = "kabupaten")
 
-#membetulkan nama kolom
+# membetulkan nama kolom
 jawatimur <- clean_names(jawatimur)
 head(jawatimur)
 
-#plot polygon luas hutan dan perairan
-ggplot(jawatimur, aes(x=long, y=lat)) +
-  geom_polygon(aes(group=group, fill=jumlah_luas_hutan_dan_perairan), color = "white") +
-  geom_text(aes(x=long, y=lat, label = kabupaten), data=nama, size=3) +
-  ylim(NA, -6.4) + xlim(NA, 116) +
+# plot polygon luas hutan dan perairan
+ggplot(jawatimur, aes(x = long, y = lat)) +
+  geom_polygon(aes(group = group, fill = jumlah_luas_hutan_dan_perairan), color = "white") +
+  geom_text(aes(x = long, y = lat, label = kabupaten), data = nama, size = 3) +
+  ylim(NA, -6.4) +
+  xlim(NA, 116) +
   scale_fill_viridis_c(option = "D", direction = -1) +
   ggtitle("Jumlah Luas Hutan dan Perairan Provinsi Jawa Timur Tahun 2018") +
-  labs(subtitle = "Dari data BPS Jawa Timur", fill="Luas Hutan & Perairan (Hektar)") +
-  theme(title = element_text(face="bold")) + coord_map() + theme_void()
+  labs(subtitle = "Dari data BPS Jawa Timur", fill = "Luas Hutan & Perairan (Hektar)") +
+  theme(title = element_text(face = "bold")) +
+  coord_map() +
+  theme_void()
 
-#===============================================================================
-#Hutan Lindung
+# ===============================================================================
+# Hutan Lindung
 jawatimur <- jawatimur %>% mutate(hutan_lindung = as.integer(hutan_lindung))
 
-#grup taruh di polygon jangan di ggplot()
-ggplot(jawatimur, aes(x=long, y=lat)) +
-  geom_polygon(aes(group=group, fill=hutan_lindung), color = "white") +
-  geom_text(data=nama, aes(x=long, y=lat, label = kabupaten), size=3) +
-  ylim(NA, -6.4) + xlim(NA, 116) +
-  labs(subtitle = "Dari data BPS Jawa Timur", fill="Luas Hutan Lindung (Hektar)") +
+# grup taruh di polygon jangan di ggplot()
+ggplot(jawatimur, aes(x = long, y = lat)) +
+  geom_polygon(aes(group = group, fill = hutan_lindung), color = "white") +
+  geom_text(data = nama, aes(x = long, y = lat, label = kabupaten), size = 3) +
+  ylim(NA, -6.4) +
+  xlim(NA, 116) +
+  labs(subtitle = "Dari data BPS Jawa Timur", fill = "Luas Hutan Lindung (Hektar)") +
   ggtitle("Luas Hutan Lindung Provinsi Jawa Timur Tahun 2018") +
-  scale_fill_viridis_c(option = "D", direction = -1
-                       ) + coord_map() + theme_void()
-
+  scale_fill_viridis_c(option = "D", direction = -1) +
+  coord_map() +
+  theme_void()

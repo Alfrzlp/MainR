@@ -10,55 +10,57 @@ library(ggtext)
 library(ggrepel)
 library(Rcpp)
 
-detach('package:stats')
+detach("package:stats")
 
-emmys <- 
+emmys <-
   read_json(
     "https://bl.ocks.org/susielu/raw/625aa4814098671290a8c6bb88a6301e/yearNetwork.json"
-  ) %>% 
-  as_tibble() %>% 
-  unnest_auto(networkLines) %>% 
-  unnest_auto(line) %>% 
-  unnest_auto(line) %>% 
+  ) %>%
+  as_tibble() %>%
+  unnest_auto(networkLines) %>%
+  unnest_auto(line) %>%
+  unnest_auto(line) %>%
   mutate(year = as.numeric(year))
 
 # Recreate visualization --------------------------------------------------
 
-emmys_plot <- 
-  df %>% 
+emmys_plot <-
+  df %>%
   ggplot(aes(year, value, colour = network)) +
   geom_line(
-    aes(linetype = network %in% c("Netflix", "HBO"),
-        size = network %in% c("Netflix", "HBO"))
+    aes(
+      linetype = network %in% c("Netflix", "HBO"),
+      size = network %in% c("Netflix", "HBO")
+    )
   ) +
   geom_segment(
     aes(x = 2013, xend = 2017, y = 0, yend = 0),
     colour = "gray92"
   ) +
   geom_segment(
-    data = ~.x %>% 
-      group_by(year) %>% 
+    data = ~ .x %>%
+      group_by(year) %>%
       summarise(value = max(value)),
     aes(x = year, xend = year, y = 0, yend = value),
     colour = "gray92"
   ) +
   geom_point(
-    data = ~ .x %>% 
+    data = ~ .x %>%
       filter(network %in% c("Netflix", "HBO")),
     size = 9
   ) +
   geom_text(
-    data = ~ .x %>% 
+    data = ~ .x %>%
       filter(network %in% c("Netflix", "HBO")),
     aes(label = value),
     family = "Lato",
     colour = "white",
     size = 2.5,
-    fontface = 'bold'
+    fontface = "bold"
   ) +
   geom_text_repel(
-    data = ~ .x %>% 
-      filter(year == 2017) %>% 
+    data = ~ .x %>%
+      filter(year == 2017) %>%
       mutate(
         year = if_else(
           network %in% c("Netflix", "HBO"),
@@ -76,7 +78,7 @@ emmys_plot <-
     segment.size = NA
   ) +
   geom_label(
-    data = ~ .x %>% 
+    data = ~ .x %>%
       distinct(year),
     aes(y = 75, label = year),
     family = "Lato",
@@ -148,10 +150,9 @@ emmys_plot
 
 ggsave(
   "outfile/dot2.png",
-  #plot = emmys_plot,
+  # plot = emmys_plot,
   width = 8,
   height = 5,
   dpi = 300,
   type = "cairo-png"
 )
-

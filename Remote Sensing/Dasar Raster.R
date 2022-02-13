@@ -13,7 +13,7 @@ class(pts)
 showDefault(pts)
 
 
-pts <- SpatialPoints(lonlat, proj4string = CRS('+proj=longlat +datum=WGS84'))
+pts <- SpatialPoints(lonlat, proj4string = CRS("+proj=longlat +datum=WGS84"))
 showDefault(pts)
 
 # raster package to improve how Spatial objects are printed.
@@ -21,11 +21,11 @@ library(raster)
 
 
 # Point -------------------------------------------------------------------
-precipvalue <- runif(nrow(lonlat), min=0, max=100)
-df <- data.frame(ID=1:nrow(lonlat), precip=precipvalue)
+precipvalue <- runif(nrow(lonlat), min = 0, max = 100)
+df <- data.frame(ID = 1:nrow(lonlat), precip = precipvalue)
 df
 
-ptsdf <- SpatialPointsDataFrame(pts, data=df)
+ptsdf <- SpatialPointsDataFrame(pts, data = df)
 ptsdf
 showDefault(ptsdf)
 
@@ -37,17 +37,17 @@ lon <- c(-116.8, -114.2, -112.9, -111.9, -114.2, -115.4, -117.7)
 lat <- c(41.3, 42.9, 42.4, 39.8, 37.6, 38.3, 37.6)
 lonlat <- cbind(lon, lat)
 
-lns <- spLines(lonlat, crs = CRS('+proj=longlat +datum=WGS84'))
+lns <- spLines(lonlat, crs = CRS("+proj=longlat +datum=WGS84"))
 lns
 
-pols <- spPolygons(lonlat, crs = CRS('+proj=longlat +datum=WGS84'))
+pols <- spPolygons(lonlat, crs = CRS("+proj=longlat +datum=WGS84"))
 pols
 
-plot(pols, col = 'yellow')
+plot(pols, col = "yellow")
 plot(lns)
 
 # A RasterLayer object represents single-layer (variable) raster data
-r <- raster(ncol=10, nrow=10, xmx=-80, xmn=-150, ymn=20, ymx=60)
+r <- raster(ncol = 10, nrow = 10, xmx = -80, xmn = -150, ymn = 20, ymx = 60)
 r
 values(r) <- runif(ncell(r))
 r
@@ -61,11 +61,11 @@ plot(r)
 # RasterStack and RasterBrick ---------------------------------------------
 
 # RasterBrick can only be linked to a single (multi-layer) file.
-# In contrast, a RasterStack can be formed from separate files 
+# In contrast, a RasterStack can be formed from separate files
 # and/or from a few layers ('bands') from a single file
 # Brick kadang lebih efisien dari stack
 r2 <- r * r
-r3  <- sqrt(r)
+r3 <- sqrt(r)
 s <- stack(r, r2, r3)
 s
 plot(s)
@@ -79,7 +79,7 @@ s <- shapefile("D:/_Datasets/gadm36_IDN_shp/gadm36_IDN_2.shp")
 s
 
 
-shapefile(jabar, 'D:/_Datasets/Jabar/jabar.shp', overwrite=TRUE)
+shapefile(jabar, "D:/_Datasets/Jabar/jabar.shp", overwrite = TRUE)
 
 # writeRaster(s, 'output.tif', overwrite=TRUE)
 
@@ -100,7 +100,7 @@ shapefile(jabar, 'D:/_Datasets/Jabar/jabar.shp', overwrite=TRUE)
 
 library(rgdal)
 epsg <- make_EPSG()
-i <- grep("indonesia", epsg$note, ignore.case=TRUE)
+i <- grep("indonesia", epsg$note, ignore.case = TRUE)
 # first three
 epsg[i[1:3], ]
 
@@ -128,25 +128,28 @@ s
 data.frame(s)
 geom(s)
 
-jabar <- s[s$NAME_1 == 'Jawa Barat',]
+jabar <- s[s$NAME_1 == "Jawa Barat", ]
 plot(jabar)
 
 e <- extent(107, 107.2, -8, -4)
 jabare <- crop(jabar, e)
 plot(jabar)
-plot(jabare, col='light blue', add=TRUE)
-plot(e, add=TRUE, lwd=3, col='red')
+plot(jabare, col = "light blue", add = TRUE)
+plot(e, add = TRUE, lwd = 3, col = "red")
 
 
 # Raster data manipulation ------------------------------------------------
 
-x <- raster(ncol = 16, nrow = 32, xmn = 100, xmx = 1000,
-            ymn = 100, ymx = 900)
+x <- raster(
+  ncol = 16, nrow = 32, xmn = 100, xmx = 1000,
+  ymn = 100, ymx = 900
+)
 x
 res(x)
 res(x) <- 100
 x
-ncol(x);nrow(x)
+ncol(x)
+nrow(x)
 projection(x) <- "+proj=utm +zone=48 +datum=WGS84"
 x
 
@@ -155,11 +158,11 @@ values(x) <- runif(ncell(x))
 ncell(x) # kayaknya ncol * nrow
 
 
-plot(x, main='Raster with 72 cells')
+plot(x, main = "Raster with 72 cells")
 dim(x)
 
 
-r1 <- r2 <- r3 <- raster(nrow=10, ncol=10)
+r1 <- r2 <- r3 <- raster(nrow = 10, ncol = 10)
 # Assign random cell values
 values(r1) <- runif(ncell(r1))
 values(r2) <- runif(ncell(r2))
@@ -179,7 +182,7 @@ raster(b, layer = 2)
 
 
 # Maps --------------------------------------------------------------------
-plot(b, add=T)
+plot(b, add = T)
 
 spplot(jabar)
 jabar

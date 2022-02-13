@@ -11,26 +11,26 @@ library(Rcpp)
 
 # Read Data ---------------------------------------------------------------
 
-data_raw <- 
-  read_json("https://bl.ocks.org/susielu/raw/625aa4814098671290a8c6bb88a6301e/yearNetwork.json") 
+data_raw <-
+  read_json("https://bl.ocks.org/susielu/raw/625aa4814098671290a8c6bb88a6301e/yearNetwork.json")
 
 glimpse(data_raw)
 
 
-data_raw %>% 
-  as_tibble() %>% 
+data_raw %>%
+  as_tibble() %>%
   # jika gatau pake apa -> auto
-  unnest_auto(networkLines) %>% 
-  unnest_auto(line) %>% 
-  unnest_auto(line) %>% 
+  unnest_auto(networkLines) %>%
+  unnest_auto(line) %>%
+  unnest_auto(line) %>%
   type_convert()
 
-df <- data_raw %>% 
-  as_tibble() %>% 
+df <- data_raw %>%
+  as_tibble() %>%
   # jika gatau pake apa -> auto
-  unnest_wider(networkLines) %>% 
-  unnest_longer(line) %>% 
-  unnest_wider(line) %>% 
+  unnest_wider(networkLines) %>%
+  unnest_longer(line) %>%
+  unnest_wider(line) %>%
   type_convert()
 
 
@@ -38,14 +38,14 @@ df <- data_raw %>%
 
 # Viz Data ----------------------------------------------------------------
 
-df %>% 
+df %>%
   ggplot(aes(x = year, y = value, colour = network)) +
   geom_line(
-   aes(linetype = network %in% c("HBO", "Netflix")),
+    aes(linetype = network %in% c("HBO", "Netflix")),
   ) +
   geom_segment(
-    data = ~.x %>% 
-      group_by(year) %>% 
+    data = ~ .x %>%
+      group_by(year) %>%
       mutate(yend = max(value)),
     aes(x = year, xend = year, y = 0, yend = yend),
     colour = "grey70",
@@ -121,10 +121,9 @@ df %>%
     x = NULL, y = NULL
   ) +
   # base_family = "Lato"
-  theme_minimal()  +
+  theme_minimal() +
   theme(
     panel.grid = element_blank(),
     axis.text = element_blank(),
-    #axis.title = element_blank()
+    # axis.title = element_blank()
   )
-  

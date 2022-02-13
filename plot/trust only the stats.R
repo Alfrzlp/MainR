@@ -9,7 +9,7 @@ windowsFonts("Fira Code Light" = windowsFont("Fira Code Light"))
 # Calculate statistical summaries for labelling ---------------------------
 
 
-  datasaurus_dozen %>%
+datasaurus_dozen %>%
   group_by(dataset) %>%
   summarise(
     mean_x = mean(x),
@@ -17,7 +17,7 @@ windowsFonts("Fira Code Light" = windowsFont("Fira Code Light"))
     sd_x = sd(x),
     sd_y = sd(y),
     r = cor(x, y)
-  ) %>% 
+  ) %>%
   mutate(
     across(
       mean_x:r,
@@ -144,5 +144,3 @@ anim_save(
   res = 150,
   renderer = gifski_renderer(loop = TRUE)
 )
-
-  

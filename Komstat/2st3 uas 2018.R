@@ -10,7 +10,7 @@ rep(2, each = 10)
 10 %>% rep(2, each = .)
 
 
-str = "No Hair Eye Sex Count N_UTS N_UAS N_TUGAS
+str <- "No Hair Eye Sex Count N_UTS N_UAS N_TUGAS
 1 Black Brown Male 32 61.19 67.06 82.6
 2 Brown Brown Male 53 61.51 58.08 79.94
 3 Red Brown Male 10 67.58 64.44 89.91
@@ -45,12 +45,12 @@ str = "No Hair Eye Sex Count N_UTS N_UAS N_TUGAS
 32 Blond Green Female 8 64.62 56.01 86.95
 "
 
-df = read.table(textConnection(str), header = T)
+df <- read.table(textConnection(str), header = T)
 df
 
 library(dplyr)
-df = df %>% 
-  mutate(n_total =  0.3*N_UTS + 0.2*N_TUGAS + 0.5*N_UAS)
+df <- df %>%
+  mutate(n_total = 0.3 * N_UTS + 0.2 * N_TUGAS + 0.5 * N_UAS)
 df
 
 # no 1A-----------------------------
@@ -58,28 +58,28 @@ df
 # dengan iteraksi pakai *
 # tanpa interaksi pakai +
 
-anova = aov(n_total~Sex*Hair*Eye, data = df)
+anova <- aov(n_total ~ Sex * Hair * Eye, data = df)
 summary(anova)
 
 
 # No 2 ------------------------
-# Sementara peneliti lain berhipotesis bahwa 
+# Sementara peneliti lain berhipotesis bahwa
 # proporsi mahasiswa berambut pirang dan bermata
 # biru berbeda antara laki-laki dan perempuan. Lakukan uji yang sesuai untuk menjawab
-# pertanyaan tersebut. 
+# pertanyaan tersebut.
 
 # p1 = mahasiswa lk rambut pirang mata biru
 # p2 = mahasiswa perempuan rambut pirang mata biru
 
 # proporsi mahasiswa rambut pirang mata biru
-df %>% 
-  group_by(Sex) %>% 
-  filter(Hair == "Blond", Eye == "Blue") %>% 
+df %>%
+  group_by(Sex) %>%
+  filter(Hair == "Blond", Eye == "Blue") %>%
   summarise(x = sum(Count))
 
 # Total Mahasiswa berdasarkan jenis kelamin
-df %>% 
-  group_by(Sex) %>% 
+df %>%
+  group_by(Sex) %>%
   summarise(n = sum(Count))
 
 prop.test(x = c(64, 30), n = c(321, 271))
@@ -94,19 +94,23 @@ prop.test(x = c(64, 30), n = c(321, 271))
 
 
 # nilai total dari laki-laki
-laki = df %>% filter(Sex == "Male") %>% 
-  select(n_total) %>% pull() #pull untuk jadikan vektor
+laki <- df %>%
+  filter(Sex == "Male") %>%
+  select(n_total) %>%
+  pull() # pull untuk jadikan vektor
 laki
 
 # nilai total dari perempuan
-wanita = df %>% filter(Sex == "Female") %>% 
-  select(n_total) %>% pull() #pull untuk jadikan vektor
+wanita <- df %>%
+  filter(Sex == "Female") %>%
+  select(n_total) %>%
+  pull() # pull untuk jadikan vektor
 wanita
 
 # prinsipnya
-boot = c()
+boot <- c()
 boot
-boot = c(boot, 3)
+boot <- c(boot, 3)
 boot
 
 
@@ -114,10 +118,10 @@ boot
 # ambil sampel sebanyak n dari niali tsb scr wr
 
 # laki ---------------------------
-boot = c()
-for(i in 1:1000){
-  x = sample(laki, replace = T)
-  boot = c(boot, mean(x))
+boot <- c()
+for (i in 1:1000) {
+  x <- sample(laki, replace = T)
+  boot <- c(boot, mean(x))
 }
 boot
 # Hasilnya laki-laki
@@ -125,10 +129,10 @@ mean(boot)
 
 
 # perempuan --------------------
-boot = c()
-for(i in 1:1000){
-  x = sample(wanita, replace = T)
-  boot = c(boot, mean(x))
+boot <- c()
+for (i in 1:1000) {
+  x <- sample(wanita, replace = T)
+  boot <- c(boot, mean(x))
 }
 boot
 # Hasilnya perempuan
@@ -142,26 +146,26 @@ mean(boot)
 # dimana i dari 1 sampai n
 # jumlah semua rata2 lalu dibagi n
 
-jack = c()
-for(i in 1:length(laki)){
-  x = mean(laki[-i])
-  jack = c(jack, x)
+jack <- c()
+for (i in 1:length(laki)) {
+  x <- mean(laki[-i])
+  jack <- c(jack, x)
 }
 jack
 
-#hasilnya
-sum(jack)/length(laki)
+# hasilnya
+sum(jack) / length(laki)
 
 # pakai library
 library(bootstrap)
 jackknife(laki, mean)
 jackknife(wanita, mean)
 
-#jack se
-var = sum((laki - sum(jack)/length(laki))^2)/(length(jack)-1)
-sqrt(var)/sqrt(length(laki))
+# jack se
+var <- sum((laki - sum(jack) / length(laki))^2) / (length(jack) - 1)
+sqrt(var) / sqrt(length(laki))
 
-sd(laki)/sqrt(length(jack)-1)
+sd(laki) / sqrt(length(jack) - 1)
 sd(laki)
 # jack bias
 # rata2 n total laki - nilai estimasi dengan jackknife
@@ -171,27 +175,27 @@ sd(laki)
 # p1 = proporsi tidak selamat penumpang
 # p2 = proporsi tidak selamat awak
 # tapi masih gatau bener apa nggak
-titanic = data.frame(Titanic)
+titanic <- data.frame(Titanic)
 titanic
 
 # total penumpang
-titanic %>% 
-  group_by(Class) %>% 
+titanic %>%
+  group_by(Class) %>%
   dplyr::summarise(n = sum(Freq))
 
 # tidak survive
-titanic %>% 
-  group_by(Class) %>% 
-  filter(Survived == "No") %>% 
+titanic %>%
+  group_by(Class) %>%
+  filter(Survived == "No") %>%
   dplyr::summarise(n = sum(Freq))
 
 # tidak survive
-c(122+167+528, 673)
+c(122 + 167 + 528, 673)
 
 # total
-c(325+285+706, 885)
+c(325 + 285 + 706, 885)
 
-prop.test(x = c(122+167+528, 673), n = c(325+285+706, 885))
+prop.test(x = c(122 + 167 + 528, 673), n = c(325 + 285 + 706, 885))
 
 
 
@@ -199,7 +203,7 @@ prop.test(x = c(122+167+528, 673), n = c(325+285+706, 885))
 library(vcd)
 library(vcdExtra)
 # masih bingung pakai data Titanic atau Titanicp
-titanic = data.frame(Titanic)
+titanic <- data.frame(Titanic)
 titanic
 
 Titanicp
@@ -207,9 +211,11 @@ dim(Titanicp)
 
 # buat kolom berat badan dari distribusi normal
 # dibulat kan ke 2 digit
-Titanicp = Titanicp %>% 
-  mutate(bb = rnorm(n = 1309, mean = 34, sd = 5),
-         bb = round(bb, 2))
+Titanicp <- Titanicp %>%
+  mutate(
+    bb = rnorm(n = 1309, mean = 34, sd = 5),
+    bb = round(bb, 2)
+  )
 
 Titanicp
 
@@ -217,9 +223,9 @@ Titanicp
 # awak kapal jika dilihat dari kelas,
 # usia, dan jenis kelamin.
 
-anova5 = aov(bb~pclass*age*sex, data = Titanicp)
+anova5 <- aov(bb ~ pclass * age * sex, data = Titanicp)
 summary(anova5)
 
 
-anova = aov(bb~pclass, Titanicp)
+anova <- aov(bb ~ pclass, Titanicp)
 summary(anova)

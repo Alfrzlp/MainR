@@ -1,15 +1,15 @@
 c(17676, 19191, 24937)
 
-(24495-24937)*100/24937
-(24937-19191)*100/19191
-(19191-17676)*100/19191
+(24495 - 24937) * 100 / 24937
+(24937 - 19191) * 100 / 19191
+(19191 - 17676) * 100 / 19191
 
-(25622-24757)*100/24757
+(25622 - 24757) * 100 / 24757
 
-(110-100)/100
+(110 - 100) / 100
 
 
-c <- '1. Aceh 2 349 3 746
+c <- "1. Aceh 2 349 3 746
 2. Sumatera Utara 6 189 5 408
 3. Sumatera Barat 3 009 2 960
 4. Riau 1 734 1 446
@@ -43,13 +43,15 @@ c <- '1. Aceh 2 349 3 746
 32. Maluku Utara 271 202
 33. Papua Barat 475 805
 34. Papua 1 492 365
-'
+"
 
-data.frame(x = strsplit(c, split = '\n')[[1]]) %>% 
+data.frame(x = strsplit(c, split = "\n")[[1]]) %>%
   separate(x, )
 
-str_split('1. Aceh 2 349 3 746')
-data.frame(nama = c("D:apalah ini kalau/bahan-kue/puding/Aceh.csv")) %>% 
-  extract(nama, into = c("a", "b", "c"),
-          regex = ".*/(.*)/(.*)/(.*)\\.csv$",
-          remove = F)
+str_split("1. Aceh 2 349 3 746")
+data.frame(nama = c("D:apalah ini kalau/bahan-kue/puding/Aceh.csv")) %>%
+  extract(nama,
+    into = c("a", "b", "c"),
+    regex = ".*/(.*)/(.*)/(.*)\\.csv$",
+    remove = F
+  )

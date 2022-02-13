@@ -26,10 +26,10 @@ rm(list = ls(envir = .env), envir = .env)
 ls(envir = .env)
 
 
-attach(a <- 1:10, pos = '.GlobalEnv')
+attach(a <- 1:10, pos = ".GlobalEnv")
 attach(.env)
 detach(.env)
 
 
 
-.env$ht = function(d, n = 5) rbind(head(d, n), tail(d, n))
+.env$ht <- function(d, n = 5) rbind(head(d, n), tail(d, n))

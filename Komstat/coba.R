@@ -1,19 +1,24 @@
 library(ggplot2)
-#ggplot(data = <DATA>, mapping = aes(<MAPPINGS>)) +<GEOM_FUNCTION>() 
-diamonds_1 <- 
-  ggplot(data = diamonds,
-         mapping = aes(x = carat, y = price, colour = clarity)) + geom_point()
+# ggplot(data = <DATA>, mapping = aes(<MAPPINGS>)) +<GEOM_FUNCTION>()
+diamonds_1 <-
+  ggplot(
+    data = diamonds,
+    mapping = aes(x = carat, y = price, colour = clarity)
+  ) +
+  geom_point()
 summary(diamonds_1)
 
-#ggplot(data = <DATA>) + <GEOM_FUNCTION>(mapping = aes(<MAPPINGS>)) 
-diamonds_2 <- 
-  ggplot(diamonds) + geom_point(aes(carat, price, colour=clarity))
+# ggplot(data = <DATA>) + <GEOM_FUNCTION>(mapping = aes(<MAPPINGS>))
+diamonds_2 <-
+  ggplot(diamonds) +
+  geom_point(aes(carat, price, colour = clarity))
 
 summary(diamonds_c2)
 
-#ggplot() +<GEOM_FUNCTION>(data = <DATA>, mapping = aes(<MAPPINGS>)
-diamonds_3 <- 
-  ggplot() + geom_point(diamonds, aes(carat, price, colour=clarity))
+# ggplot() +<GEOM_FUNCTION>(data = <DATA>, mapping = aes(<MAPPINGS>)
+diamonds_3 <-
+  ggplot() +
+  geom_point(diamonds, aes(carat, price, colour = clarity))
 
 summary(diamonds_3)
 
@@ -36,7 +41,7 @@ storms %>%
 library(janitor)
 library(readxl)
 
-indodapoer = read.csv("D:/Datasets/indodapoer.csv")
+indodapoer <- read.csv("D:/Datasets/indodapoer.csv")
 head(colnames(indodapoer), 15)
 indodapoer <- clean_names(indodapoer)
 head(colnames(indodapoer), 15)
@@ -46,7 +51,7 @@ View(indodapoer)
 library(stringr)
 library(dplyr)
 
-pdrb_pjawa<- 
+pdrb_pjawa <-
   indodapoer %>%
   filter(
     area_name %in% c(
@@ -61,10 +66,11 @@ pdrb_pjawa<-
   transmute(
     provinsi = str_remove(area_name, ", Prop."),
     tahun = year,
-    pdrb_nonmigas = total_gdp_excluding_oil_and_gas_in_idr_million_constant_price) %>% 
-  filter(!is.na(pdrb_nonmigas)) 
+    pdrb_nonmigas = total_gdp_excluding_oil_and_gas_in_idr_million_constant_price
+  ) %>%
+  filter(!is.na(pdrb_nonmigas))
 
-pdrb_pjawa = glimpse(pdrb_pjawa)
+pdrb_pjawa <- glimpse(pdrb_pjawa)
 View(pdrb_pjawa)
 
 library(ggplot2)
@@ -81,20 +87,20 @@ library(ggplot2)
 library(dplyr)
 library(directlabels)
 
-pdrb_pjawa %>% 
+pdrb_pjawa %>%
   ggplot(aes(tahun, pdrb_nonmigas)) +
   geom_line(aes(colour = provinsi), show.legend = F) +
   geom_dl(
-    aes(label = provinsi), 
+    aes(label = provinsi),
     method = "last.points",
     position = position_nudge(x = 0.3) # agar teks tidak berhimpitan dengan garis
   )
 
-pdrb_pjawa %>% 
-  ggplot(aes(tahun, pdrb_nonmigas/1e6)) +
+pdrb_pjawa %>%
+  ggplot(aes(tahun, pdrb_nonmigas / 1e6)) +
   geom_line(aes(colour = provinsi), show.legend = FALSE) +
   geom_dl(
-    aes(label = provinsi), 
+    aes(label = provinsi),
     method = "last.points",
     position = position_nudge(x = 0.3) # agar teks tidak berhimpitan dengan garis
   ) +
@@ -103,5 +109,6 @@ pdrb_pjawa %>%
     y = NULL,
     title = "PDRB Non-Migas di Pulau Jawa Hingga Tahun 2011",
     subtitle = "PDRB atas dasar harga konstan, dalam satuan triliun",
-    caption =  "Data INDO-DAPOER, The World Bank" ) + coord_cartesian(clip = "off") 
-
+    caption = "Data INDO-DAPOER, The World Bank"
+  ) +
+  coord_cartesian(clip = "off")

@@ -7,55 +7,68 @@ update_dataset()
 
 
 ui <- fluidPage(
-  dashboardPage(skin = "blue",
-                dashboardHeader(title = "Informasi Virus Corona", titleWidth = 600),
-                #-------------------------------
-                dashboardSidebar(
-                  sidebarMenu(
-                              menuItem("Apa itu Covid-19", tabName = "penjelasan1", icon = icon("question-circle")),
-                              menuItem("chart", icon = icon("bar-chart-o"),
-                                       menuSubItem("Sebaran di Indonesia",
-                                                   tabName = "chart1",
-                                                   icon = icon("line-chart")),
-                                       
-                                       menuSubItem("Sebaran di Dunia",
-                                                   tabName = "chart2",
-                                                   icon = icon("line-chart"))
-                                       ), #menu item 2
-                              menuItem("Database", tabName = "db", icon = icon("database"))
-                              )#sidebar menu
-                ), 
-                #-------------------------------
-                dashboardBody(
-                  tabItems(
-                    tabItem("penjelasan1", h4("Merupakan suatu jenis virus")),
-                    tabItem(tabName = "chart1",
-                            # First Row
-                            fluidRow(box(title = "Perbandingan Kasus positif dan Meninggal", plotlyOutput("plot1", height = 250), width = 12),
-                                     box(title = "Perbandingan Kasus Korona Beberapa Negara", plotlyOutput("plot2", height = 250),
-                                         width=6, solidHeader = F),
-                                     box(title = "Hubungan Kasus Positif dan Meninggal", plotlyOutput("plot3", height = 250)
-                                     ))),
-                    tabItem(tabName = "chart2",
-                            # First Row
-                            fluidRow(box(title = "Box with a plot", plotlyOutput("plot4", height = 450)), width = 12)),
-                    tabItem(tabName = "db",
-                            # First Row
-                            fluidRow(tabBox(id="tabchart1",
-                                            tabPanel("World",DT::dataTableOutput("Tab1", height = "450px"), width = 9),
-                                            tabPanel("Indonesia",DT::dataTableOutput("Tab2", height = "450px"), width = 9), width = 12)))
-                  )
-                )
-                #-------------------------------
-                )#dasboardpage
-  
-)#fluid
+  dashboardPage(
+    skin = "blue",
+    dashboardHeader(title = "Informasi Virus Corona", titleWidth = 600),
+    #-------------------------------
+    dashboardSidebar(
+      sidebarMenu(
+        menuItem("Apa itu Covid-19", tabName = "penjelasan1", icon = icon("question-circle")),
+        menuItem("chart",
+          icon = icon("bar-chart-o"),
+          menuSubItem("Sebaran di Indonesia",
+            tabName = "chart1",
+            icon = icon("line-chart")
+          ),
 
-server<-shinyServer(function(input, output, session){
-  
-  #membandingkan kasus beberapa negara
+          menuSubItem("Sebaran di Dunia",
+            tabName = "chart2",
+            icon = icon("line-chart")
+          )
+        ), # menu item 2
+        menuItem("Database", tabName = "db", icon = icon("database"))
+      ) # sidebar menu
+    ),
+    #-------------------------------
+    dashboardBody(
+      tabItems(
+        tabItem("penjelasan1", h4("Merupakan suatu jenis virus")),
+        tabItem(
+          tabName = "chart1",
+          # First Row
+          fluidRow(
+            box(title = "Perbandingan Kasus positif dan Meninggal", plotlyOutput("plot1", height = 250), width = 12),
+            box(
+              title = "Perbandingan Kasus Korona Beberapa Negara", plotlyOutput("plot2", height = 250),
+              width = 6, solidHeader = F
+            ),
+            box(title = "Hubungan Kasus Positif dan Meninggal", plotlyOutput("plot3", height = 250))
+          )
+        ),
+        tabItem(
+          tabName = "chart2",
+          # First Row
+          fluidRow(box(title = "Box with a plot", plotlyOutput("plot4", height = 450)), width = 12)
+        ),
+        tabItem(
+          tabName = "db",
+          # First Row
+          fluidRow(tabBox(
+            id = "tabchart1",
+            tabPanel("World", DT::dataTableOutput("Tab1", height = "450px"), width = 9),
+            tabPanel("Indonesia", DT::dataTableOutput("Tab2", height = "450px"), width = 9), width = 12
+          ))
+        )
+      )
+    )
+    #-------------------------------
+  ) # dasboardpage
+) # fluid
+
+server <- shinyServer(function(input, output, session) {
+
+  # membandingkan kasus beberapa negara
   output$plot2 <- renderPlotly({
-    
     df <- coronavirus %>%
       dplyr::group_by(country, type) %>%
       dplyr::summarise(total = sum(cases)) %>%
@@ -63,8 +76,8 @@ server<-shinyServer(function(input, output, session){
         names_from = type,
         values_from = total
       )
-    
-    #membandingkan kasus
+
+    # membandingkan kasus
     konfirmasi_harian <- coronavirus %>%
       dplyr::filter(type == "confirmed") %>%
       dplyr::filter(date >= "2020-06-25") %>%
@@ -115,17 +128,16 @@ server<-shinyServer(function(input, output, session){
           pad = 2
         )
       )
-    
   })
-  
+
   ## Plot terkonfirmasi positif dan meninggal
-  output$plot1 <- renderPlotly({##tampilkan data
+  output$plot1 <- renderPlotly({ ## tampilkan data
     df <- coronavirus %>%
       dplyr::filter(country == "Indonesia") %>%
       dplyr::group_by(country, type) %>%
       dplyr::summarise(total = sum(cases))
-    ##Panggil nama tabel
-    #untuk mempercantik tabel
+    ## Panggil nama tabel
+    # untuk mempercantik tabel
     df <- coronavirus %>%
       # dplyr::filter(date == max(date)) %>%
       dplyr::filter(country == "Indonesia") %>%
@@ -134,13 +146,13 @@ server<-shinyServer(function(input, output, session){
       tidyr::pivot_wider(
         names_from = type,
         values_from = total
-      ) 
-    
-    #melihat kasus corona perhari 
-    ##Data Harian
+      )
+
+    # melihat kasus corona perhari
+    ## Data Harian
     df_harian <- coronavirus %>%
       dplyr::filter(country == "Indonesia") %>%
-      dplyr::filter(date >= "2020-03-01") %>% 
+      dplyr::filter(date >= "2020-03-01") %>%
       dplyr::group_by(date, type) %>%
       dplyr::summarise(total = sum(cases, na.rm = TRUE)) %>%
       tidyr::pivot_wider(
@@ -155,8 +167,8 @@ server<-shinyServer(function(input, output, session){
         death_cum = cumsum(death),
         active_cum = cumsum(active)
       )
-    
-    ##Plot Data Harian (mati dan terkonfirmasi)
+
+    ## Plot Data Harian (mati dan terkonfirmasi)
     confirmed_color <- "purple"
     active_color <- "#7FFFD4"
     recovered_color <- "forestgreen"
@@ -214,22 +226,22 @@ server<-shinyServer(function(input, output, session){
         legend = list(x = 0.1, y = 0.9),
         hovermode = "compare"
       )
-    
   })
-  
+
   ## tabel selanjutnya jika ingin dimasukkan
   output$plot4 <- renderPlotly({
   })
-  
+
   ## tabel 1
   output$Tab1 <- DT::renderDataTable(DT::datatable({
-    data <-coronavirus }))
+    data <- coronavirus
+  }))
   ## tabel 2
   output$Tab2 <- DT::renderDataTable(DT::datatable({
-    #filter indo
+    # filter indo
     df_indo <- coronavirus %>%
       dplyr::filter(country == "Indonesia") %>%
-      dplyr::filter(date >= "2020-03-01") %>% 
+      dplyr::filter(date >= "2020-03-01") %>%
       dplyr::group_by(date, type) %>%
       dplyr::summarise(total = sum(cases, na.rm = TRUE)) %>%
       tidyr::pivot_wider(
@@ -244,12 +256,13 @@ server<-shinyServer(function(input, output, session){
         death_cum = cumsum(death),
         active_cum = cumsum(active)
       )
-    data <-df_indo }))
-  
+    data <- df_indo
+  }))
+
   ## Plotly Scatter Plot
   output$plot3 <- renderPlotly({
     df_indo <- coronavirus %>%
-      dplyr::filter(country == "Indonesia", date >= "2020-03-01") %>% 
+      dplyr::filter(country == "Indonesia", date >= "2020-03-01") %>%
       dplyr::group_by(date, type) %>%
       dplyr::summarise(total = sum(cases, na.rm = TRUE)) %>%
       tidyr::pivot_wider(
@@ -264,15 +277,15 @@ server<-shinyServer(function(input, output, session){
         death_cum = cumsum(death),
         active_cum = cumsum(active)
       )
-    
-    plot_ly(data=df_indo, 
-            x=~confirmed, 
-            y=~death, color = "#8FBC8F",
-            type = "scatter",
-            mode = "markers")
-    
+
+    plot_ly(
+      data = df_indo,
+      x = ~confirmed,
+      y = ~death, color = "#8FBC8F",
+      type = "scatter",
+      mode = "markers"
+    )
   })
-  
 })
 shinyApp(ui, server)
 
