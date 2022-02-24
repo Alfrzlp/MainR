@@ -76,3 +76,50 @@ df
 ptsdf <- SpatialPointsDataFrame(pts, data = df)
 library(rgdal)
 writeOGR(ptsdf, "E:/pointku.geojson", layer = "pointku", driver = "GeoJSON")
+
+
+
+
+# -------------------------------------------------------------------------
+
+pch <- readxl::read_xlsx('D:/__SEMESTER 6/_PKL/hasil/VPKL61_R2_PENCACAHAN_results.json.xlsx')
+pch %>% 
+  dplyr::filter(a203b == '040') %>% 
+  distinct(a102, .keep_all = T) %>% 
+  dim()
+
+
+gc <- readxl::read_xlsx('D:/__SEMESTER 6/_PKL/hasil/VPKL61_R2_GROUNDCHECK_results.json.xlsx')
+gc
+
+gc %>% 
+  dplyr::filter(
+    b203b == '040',
+    b201 == 'RIDSON ALFARIZAL PULUNGAN'
+  ) %>% 
+  mutate(
+    no = as.numeric(substr(b106, start = 6, 7)),
+    .before = record
+  ) %>% 
+  distinct(no) %>% 
+  as.data.frame()
+count()
+arrange(no) %>% 
+  as.data.frame() %>% 
+  pull(no)
+
+id <- saguling %>% 
+  dplyr::filter(desa %in% c("002", "004", "006")) %>% 
+  pull(id)
+
+setdiff(id, no)
+
+saguling %>% 
+  dplyr::filter(desa %in% c("002", "004", "006"))
+
+
+
+27 60
+cikande 23
+cipangeran 9
+saguling 8

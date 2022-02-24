@@ -1,14 +1,17 @@
 # clearscreen
-cat("\014")
+
 # Customise the R prompt that prefixes every command
 # (use " " for a blank prompt)
 
-options(prompt = "~> ", show.signif.stars = F)
+
 
 if (interactive()) {
-  suppressMessages(require(devtools))
-  suppressMessages(require(tidyverse))
-
+  cat("\014")
+  # suppressMessages(require(devtools))
+  suppressMessages(suppressWarnings(require(tidyverse)))
+  suppressMessages(suppressWarnings(require(crayon)))
+  suppressMessages(suppressWarnings(require(grDevices)))
+  
   jam <- as.numeric(str_extract(Sys.time(), pattern = "\\s\\d+"))
   salam <-
     case_when(
@@ -17,7 +20,15 @@ if (interactive()) {
       between(jam, 16, 18) ~ "Selamat Sore",
       between(jam, 19, 24) ~ "Selamat Malam"
     )
-  cat(salam, "Ridson..")
-  message("\nSelamat datang di R\n")
+  lime <- make_style(rgb(94, 201, 98, maxColorValue = 255), bg = F)
+  ivory <- make_style("ivory")
+  cat(bold(lime(ivory(salam, "Ridson..."))))
+  cat(bold("\nSelamat datang di R\n\n"))
+  
+  cat(lime(italic('tidyverse :')), ivory('oke'), '\n')
+  tidyverse_conflicts()
   rm(salam, jam)
+  source('awal.R')
 }
+
+
