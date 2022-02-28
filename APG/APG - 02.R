@@ -44,7 +44,7 @@ spectral_decomposition <- function(A){
     A2 = A2
   ))
 }
-
+deviation_matrix <- function(X) return(X - matrix(colMeans(X), nrow  = nrow(X), ncol = ncol(X), byrow = T))
 
 
 

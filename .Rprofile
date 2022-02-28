@@ -22,13 +22,14 @@ if (interactive()) {
     )
   lime <- make_style(rgb(94, 201, 98, maxColorValue = 255), bg = F)
   ivory <- make_style("ivory")
-  cat(bold(lime(ivory(salam, "Ridson..."))))
+  
+  cat(lime((ivory(salam, "Ridson..."))))
   cat(bold("\nSelamat datang di R\n\n"))
   
-  cat(lime(italic('tidyverse :')), ivory('oke'), '\n')
-  tidyverse_conflicts()
+  cat(cyan(italic('tidyverse :')), ivory('sudah diload'), '\n')
+  cat(lime(italic('Selamat beraktivitas ...')), '\n\n')
+  print(tidyverse_conflicts())
   rm(salam, jam)
-  source('awal.R')
 }
 
 

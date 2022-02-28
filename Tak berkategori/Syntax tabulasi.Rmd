@@ -1,0 +1,257 @@
+---
+title: "Skripsi"
+author: "Andi Alfitra"
+date: "2/24/2022"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(readxl)
+library(janitor)
+
+```
+
+# Tabulasi Data
+##Fungsi read_pattern
+```{r}
+read_pattern <- function (s, pos_non_angka = NULL, pos_angka = NULL,
+          col_names = paste0("v", 1:length(c(pos_non_angka, pos_angka))), sep = "\\s", 
+          pattern = NULL, ...) 
+{
+  args <- is.numeric(pos_non_angka) + is.numeric(pos_angka)
+  ak <- "(-*\\d*,*\\.*\\d*|\\d*)"
+  non_ak <- "(\\X*)"
+  if (is.null(pattern) & args == 2) {
+    pattern <- c()
+    pattern[pos_angka] <- ak
+    pattern[pos_non_angka] <- non_ak
+    pattern <- paste0(pattern, collapse = sep)
+  }
+  else if (!is.null(pattern) & args == 0) {
+    pattern <- gsub("(?<=\\()\\s*angka", "-*\\\\d*,*\\\\.*\\\\d*|\\\\d*", 
+                    pattern, ignore.case = T, perl = T)
+    pattern <- gsub("(?<=\\()\\s*non_*\\s*angka", "\\\\X*", 
+                    pattern, ignore.case = T, perl = T)
+  }
+  else {
+    warning("Silahkan isi `pos_non_angka` dan `pos_angka` dengan numeric vector. jika anda ingin custom silakan isi `pattern` dan biarkan kosong `pos_non_angka` dan `pos_angka`")
+  }
+  tidyr::extract(data.frame(st = stringr::str_split(s, pattern = "\\n")[[1]]), 
+                 col = 1, into = col_names, regex = pattern, ...)
+}
+
+```
+
+
+```{r}
+#Terlebih dahulu dibuat dataframe kosong unutuk diappend bersama data lainnya
+df<-data.frame(matrix(NA,ncol=16,nrow=0))
+columns<-c('No','Kabupaten','NCPR','Pov',
+                'Food','Elec','Water','Life',
+                'Health','School','Stunting',
+                'Prioritas','Kabkotno','Provno',
+                'Provinsi')
+```
+
+
+##Sumatera
+```{r}
+Aceh <- 
+"1 Simeulue 1,19 18,99 36,31 0,21 22,18 65,22 2,75 8,84 28,21 5 
+2 Aceh Singkil 3,97 20,78 39,47 0,00 42,40 67,36 2,79 8,76 - 3 
+3 Aceh Selatan 0,80 13,09 54,14 0,77 42,92 64,27 5,08 9,01 - 5 
+4 Aceh Tenggara 0,26 13,43 58,42 0,40 49,34 68,04 6,14 8,71 42,83 5 
+5 Aceh Timur 0,55 14,47 58,23 0,87 44,30 68,67 3,09 8,16 25,50 5 
+6 Aceh Tengah 1,54 15,50 27,05 0,08 36,60 68,82 3,35 9,79 42,87 5 
+7 Aceh Barat 0,71 18,79 20,21 0,48 20,25 67,93 2,73 8,92 - 6 
+8 Aceh Besar 0,40 13,92 37,93 0,84 7,72 69,77 1,96 10,55 - 6 
+9 Piddie 0,33 19,46 55,08 0,32 35,15 66,89 1,54 8,28 - 5 
+10 Bireuen 0,48 13,56 43,11 0,84 32,40 71,16 0,81 9,85 32,88 6 
+11 Aceh Utara 0,28 17,39 54,59 0,00 41,08 68,79 1,07 8,93 - 6 
+12 Aceh Barat Daya 0,37 16,26 42,51 0,41 31,27 64,91 2,23 8,96 - 6 
+13 Gayo Lues 0,52 19,87 36,15 0,70 28,07 65,38 8,25 8,25 29,16 5 
+14 Aceh Tamiang 0,74 13,38 43,40 0,57 22,02 69,52 2,52 9,26 - 6 
+15 Nagan Raya 0,78 17,97 36,74 0,00 36,54 69,14 4,93 9,13 26,46 5 
+16 Aceh Jaya 0,30 13,36 41,55 0,94 28,09 67,11 7,09 9,06 - 6 
+17 Bener Meriah 5,00 19,30 37,74 1,89 33,82 69,19 1,69 10,05 28,15 2 
+18 Pidie Jaya 0,30 19,31 49,05 0,18 32,44 70,06 1,32 9,36 27,87 6 "
+
+Sumut <- "19 Nias 0,77 15,94 43,17 22,39 81,81 69,68 2,38 5,57 56,21 4 
+20 Mandailing Natal 0,81 9,11 59,87 5,56 52,43 62,51 3,06 8,85 49,91 5 
+21 Tapanuli Selatan 0,47 8,60 56,65 2,85 46,51 64,82 6,97 9,22 - 5 
+22 Tapanuli Tengah 1,31 12,53 44,66 3,69 42,18 67,08 1,66 8,63 36,32 5 
+23 Tapanuli Utara 0,34 9,48 60,34 1,45 37,19 68,46 2,80 9,59 - 6 
+24 Toba Samosir 0,22 8,60 50,46 1,48 40,70 69,93 2,39 10,23 - 6 
+25 Labuhan Batu 1,17 8,44 28,11 0,11 28,72 69,86 1,93 9,09 - 6 
+26 Asahan 1,93 9,68 30,07 0,42 24,34 68,11 2,01 8,77 - 5 
+27 Simalungun 0,43 8,81 40,79 0,88 39,75 71,07 2,33 9,64 32,38 6 
+28 Dairi 0,33 7,70 55,91 2,22 42,81 68,79 2,20 9,45 39,27 6 
+29 Karo 0,18 8,23 58,59 2,15 24,41 71,27 1,86 9,89 - 6 
+30 Deli Serdang 1,03 3,89 29,06 0,06 12,34 71,61 0,69 10,11 30,97 6 
+31 Langkat 1,03 9,91 39,18 0,12 23,33 68,59 1,97 8,51 18,21 6 
+32 Nias Selatan 0,69 16,45 36,87 24,78 66,15 68,58 1,49 6,05 57,00 4 
+33 Humbang Hasundutan 0,31 8,75 56,03 0,65 46,21 69,06 3,45 9,49 - 6 
+34 Pakpak Barat 0,80 9,27 42,69 2,09 56,28 65,59 4,15 8,76 39,04 5 
+35 Samosir 0,30 12,52 54,42 1,07 58,74 71,16 3,73 8,60 - 6 
+36 Serdang Bedegai 0,17 7,90 30,32 0,28 28,25 68,46 1,46 8,53 - 6 
+37 Batu Bara 0,95 12,14 33,92 0,16 28,38 66,75 1,67 8,42 - 6 
+38 Padang Lawas Utara 1,51 9,60 48,71 1,54 47,76 67,06 5,89 9,12 49,28 5 
+39 Padang Lawas 1,32 8,28 44,48 2,61 51,81 66,98 3,62 8,98 41,95 5 
+40 Labuhan Batu Selatan 5,00 8,94 23,26 0,29 24,46 68,64 3,53 9,00 - 3 
+41 Labuhan Batu Utara 1,35 9,57 42,80 0,80 39,13 69,37 4,50 8,36 - 5 
+42 Nias Utara 0,46 24,99 37,14 17,44 61,04 69,29 1,80 6,32 26,57 5 
+43 Nias Barat 1,43 25,51 54,56 11,25 81,37 68,82 1,09 6,42 43,95 3 "
+
+Sumbar<-"44 Kepulauan Mentawai 3,72 14,43 54,99 25,81 68,08 64,68 13,48 7,18 - 2 
+45 Pesisir Selatan 0,35 7,88 30,48 0,70 22,69 70,73 5,38 8,82 - 6 
+46 Solok 0,37 7,98 43,96 1,11 31,94 68,34 3,55 8,05 35,45 6 
+47 Sawah Lunto/Sijunjung 0,83 7,04 29,45 0,87 32,30 66,02 5,44 8,51 - 6 
+48 Tanah Datar 0,27 4,66 38,34 1,65 26,26 69,73 1,48 8,99 - 6 
+49 Padang Pariaman 0,43 7,10 36,57 0,69 35,29 68,58 1,18 8,15 - 6 
+50 Agam 0,38 6,75 31,96 0,95 32,28 72,17 2,10 9,26 - 6 
+51 Limapuluh Koto 0,39 6,97 41,28 1,11 36,68 69,70 4,90 8,14 28,94 6 
+52 Pasaman 0,26 7,21 44,98 1,50 34,13 67,18 4,69 8,61 35,67 6 
+53 Solok Selatan 0,29 7,33 32,25 2,15 37,51 67,58 5,56 8,42 - 6 
+54 Dharmas Raya 1,25 6,29 19,20 0,66 39,42 71,10 4,64 8,86 - 6 
+55 Pasaman Barat 0,45 7,14 45,51 0,90 40,76 67,67 3,53 8,89 31,66 6"
+
+Riau<-"56 Kuantan Sengingi 2,78 9,56 24,86 1,69 28,66 68,44 6,34 8,82 - 5 
+57 Indragiri Hulu 3,51 6,06 16,03 2,84 21,61 70,20 5,76 8,54 - 4 
+58 Indragiri Hilir 1,42 6,54 33,23 8,70 74,85 67,66 6,95 7,66 - 4 
+59 Pelalawan 4,39 9,62 28,85 3,17 13,37 71,03 11,63 8,65 22,97 4 
+60 Siak 2,36 5,03 12,28 0,81 14,05 71,03 6,82 9,54 - 6 
+61 Kampar 5,00 7,71 25,70 0,14 32,49 70,64 5,84 9,24 23,07 3 
+62 Rokan Hulu 5,00 10,53 28,41 2,00 33,41 69,89 7,02 8,74 24,37 3 
+63 Bengkalis 3,27 6,27 20,92 0,58 38,65 71,11 4,78 9,26 - 4 
+64 Rokan Hilir 2,87 7,01 25,80 2,09 38,90 70,17 5,24 8,60 28,87 4 
+65 Kepulauan Meranti 5,00 26,93 15,87 5,25 92,21 67,53 6,26 7,58 25,10 1 "
+Jambi<-"66 Kerinci 0,36 7,13 31,70 0,00 33,76 69,82 5,38 8,08 33,85 6 
+67 Merangin 1,50 8,48 33,30 0,45 53,94 71,18 4,94 7,90 15,38 5 
+68 Sarolangun 2,31 8,45 34,82 1,44 46,17 69,09 5,66 7,94 - 5 
+69 Batanghari 2,79 9,75 37,32 1,05 42,03 70,44 6,69 8,30 - 4 
+70 Muara Jambi 4,46 3,83 37,01 0,58 29,70 71,18 5,43 8,63 - 4 
+71 Tanjung Jabung Timur 0,89 11,54 34,63 2,68 67,22 66,08 7,23 6,76 20,05 5 
+72 Tanjung Jabung Barat 1,69 10,56 45,34 3,95 59,33 68,03 4,13 7,79 21,81 4 
+73 Tebo 2,46 6,47 31,85 1,26 42,67 69,91 9,50 7,74 - 5 
+74 Bungo 2,84 5,60 24,98 1,80 28,81 67,61 3,15 8,20 - "
+Sumsel<-"75 Ogan Komering Ulu 1,33 12,77 27,74 0,38 30,65 68,01 2,59 8,90 - 5 
+76 Ogan Komering Ilir 0,31 15,01 30,95 0,37 42,24 68,41 7,53 7,16 38,06 6 
+77 Muara Enim (Liot) 1,22 12,41 30,39 0,00 39,74 68,63 3,56 8,00 38,62 5
+78 Lahat 0,98 15,92 32,18 0,00 51,16 65,76 6,38 8,52 29,53 5 
+79 Musi Rawas 0,57 13,37 24,93 1,57 33,12 67,86 4,39 7,71 - 6 
+80 Musi Banyuasin 0,74 16,41 21,83 1,10 40,09 68,54 7,47 7,66 - 5 
+81 Banyuasin 0,16 11,33 31,45 2,76 51,19 68,76 6,97 7,51 28,28 6 
+82 Ogan Komering Ulu Selatan 0,30 10,53 53,68 1,78 59,57 66,76 5,19 7,72 - 5 
+83 Ogan Komering Ulu Timur 0,18 10,43 15,36 0,21 44,69 68,87 1,40 7,68 - 6 
+84 Ogan Ilir 1,04 13,31 27,90 1,05 30,70 65,21 1,78 8,21 35,56 5 
+85 Empat Lawang 0,72 12,30 52,37 5,10 80,42 64,81 2,80 7,48 - 4 
+86 Penukal Abab Lematang Ilir 1,63 13,47 26,74 0,00 35,08 68,07 2,05 7,00 - 5 
+87 Musi Rawas Utara 3,91 19,12 38,96 2,90 49,80 65,43 7,23 6,68 - 2 "
+Bengkulu<-"88 Bengkulu Selatan 0,30 18,54 42,35 0,38 51,84 67,79 1,10 9,03 25,22 5 
+89 Rejang Lebong 1,05 15,95 28,07 1,58 62,78 68,37 1,62 9,04 - 5 
+90 Bengkulu Utara 1,49 11,65 27,66 0,78 64,65 68,04 4,60 7,82 27,62 5 
+91 Kaur 0,72 18,89 32,49 2,01 54,20 66,50 4,25 8,31 30,53 5 
+92 Seluma 0,67 19,10 31,27 2,62 72,40 67,56 2,83 7,77 40,13 4 
+93 Mukomuko 1,16 11,70 21,64 0,67 53,68 66,51 4,46 8,11 - 5 
+94 Lebong 0,35 11,77 49,37 0,81 33,83 63,12 4,07 8,01 - 6 
+95 Kepahiang 1,03 14,74 28,24 2,38 67,08 67,78 0,94 8,16 - 5 
+96 Bengkulu Tengah 2,05 8,80 30,81 2,31 54,75 68,12 2,15 7,32 - 4"
+Lampung<-"97 Lampung Barat 0,86 12,92 25,98 1,07 44,70 67,43 2,90 7,94 - 5 
+98 Tanggamus 0,84 12,05 38,40 0,30 41,89 68,40 2,35 7,46 27,39 5 
+99 Lampung Selatan 0,29 14,31 34,32 0,08 32,59 69,20 0,43 7,60 30,39 6 
+100 Lampung Timur 0,13 15,24 22,70 0,15 46,53 70,61 3,78 7,59 26,12 6 
+101 Lampung Tengah 0,16 12,03 31,46 0,22 47,76 69,75 1,41 7,83 21,41 6 
+102 Lampung Utara 0,16 19,90 42,37 0,89 67,45 69,05 1,62 8,09 38,56 5 
+103 Way Kanan 0,35 13,07 35,47 0,12 65,47 69,27 2,93 7,15 - 5 
+104 Tulang Bawang 0,17 9,35 20,26 0,96 31,44 69,88 3,71 7,52 - 6 
+105 Pesawaran 0,29 15,19 28,01 0,17 29,15 68,88 2,60 7,75 25,84 6 
+106 Pringsewu 0,50 10,15 29,00 0,00 16,14 69,85 0,43 8,23 - 6 
+107 Mesuji 0,14 7,47 18,16 1,05 26,81 68,04 3,38 6,64 - 6 
+108 Tulang Bawang Barat 0,15 7,75 22,95 0,00 72,18 69,88 1,57 7,24 - 6 
+109 Pesisir Barat 0,41 14,48 44,77 4,02 47,01 63,27 4,83 8,11 - 5"
+Babel<-"110 Bangka 1,76 4,92 20,61 0,37 15,20 70,99 1,84 8,34 20,86 6 
+111 Belitung 5,00 6,29 6,63 0,46 12,42 70,94 2,88 8,59 - 4 
+112 Bangka Barat 2,60 2,67 17,69 0,36 24,75 69,99 3,85 7,31 23,30 5 
+113 Bangka Tengah 5,00 5,02 17,62 0,00 13,65 71,16 3,51 7,77 - 4 
+114 Bangka Selatan 0,92 3,36 26,86 0,18 22,61 67,90 5,75 6,79 21,59 6 
+115 Belitung Timur 5,00 6,60 11,37 0,75 13,26 71,90 4,36 8,14 - 4"
+Kepri<-"116 Karimun 5,00 6,61 16,50 0,31 22,74 70,71 1,04 7,78 15,08 3
+117 Bintan 5,00 6,37 7,67 1,35 33,85 70,30 1,67 8,04 - 3 
+118 Natuna 5,00 4,42 22,53 0,52 24,30 64,81 3,49 8,39 17,36 3 
+119 Lingga 5,00 12,88 26,77 0,78 23,34 61,75 3,97 7,11 16,49 2 
+120 Kepulauan Anambas 5,00 6,44 17,62 0,42 40,74 67,06 1,51 7,07 - 3"
+```
+
+##Jawa 
+```{r}
+Jakarta<-"121 Kep. Seribu 5,00 12,09 74,94 0,00 9,43 68,51 0,05 8,52 29,16 3 
+```
+
+
+```{r}
+tabulasi<-function(df, prov, provno=NULL, prov_name=NULL)
+{ prov_df<-read_pattern(prov, pos_non_angka = 2, pos_angka = c(1,3:13))
+  prov_df1<-cbind(prov_df,
+                  data.frame(Provno=rep(provno,nrow(prov_df)),
+                  Provinsi=rep(prov_name, nrow(prov_df))))
+  df<-rbind(df,prov_df1)
+  return(df)
+}
+
+```
+
+```{r}
+df<-tabulasi(df=df, Aceh,provno = 11,prov_name = 'Aceh')
+df<-tabulasi(df=df, Sumut, provno = 12,prov_name = 'Sumatera Utara')
+```
+
+```{r}
+kompilasi_data <- readxl::read_xlsx('C:/Users/LENOVO/Downloads/Kompilasi Data.xlsx')
+kompilasi_data <- 
+  kompilasi_data %>% 
+  janitor::clean_names() %>% 
+  mutate(
+    kabkot = str_to_title(kabkot),
+    provinsi = str_to_title(provinsi),
+  )
+head(kompilasi_data)
+
+prov <- list(
+  Aceh = Aceh, 
+  'Sumatra Utara' = Sumut
+) 
+
+data1<-lapply(
+    seq_along(prov),
+    function (i){
+      read_pattern(
+        prov[[i]], pos_non_angka = 2, pos_angka = c(1, 3:13)
+      ) %>% 
+        mutate(
+          Prov = names(prov)[[i]],
+          .before = v2
+        ) %>% 
+        mutate(
+          v11 = str_replace_all(v11, '-', 'NA')
+        ) %>% 
+        mutate_at(vars(v3:v11), ~str_replace_all(.x, ',', '\\.')) %>% 
+        mutate(
+          provno = kompilasi_data$provno[kompilasi_data$provinsi == names(prov)[[i]]][1],
+          .before = Prov
+        ) %>% 
+        rename(
+          kabkot = v2
+        ) %>% 
+        type_convert() 
+    }
+  ) %>% 
+  do.call(rbind, .)
+```
+
+
+
