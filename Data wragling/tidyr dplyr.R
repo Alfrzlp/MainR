@@ -109,3 +109,31 @@ dm::read_string(s) %>%
     S = accumulate(S, function(prev, new) prev*new)
   )
 
+
+
+# -------------------------------------------------------------------------
+dat <- data.frame(
+  kelas = rep(1:2, c(5, 3)),
+  anak = rep(c('lk', 'pr'), c(3, 5))
+)
+
+dat %>% 
+  group_by(kelas) %>% 
+  mutate(
+    # kelas hanya pr
+    k1 = if_else(all(anak == 'pr'), 1, 0),
+    # kelas hanya lk
+    k2 = if_else(all(anak == 'lk'), 1, 0),
+    # kelas ada lk dan pr
+    k3 = if_else(any(anak == 'lk') & any(anak == 'pr'), 1, 0)
+  )
+
+
+
+# -------------------------------------------------------------------------
+# pilih kolom yang tidak ada lebih dari 100%
+dat %>% 
+  select_if(~ mean(.x <= 100) == 1) %>% 
+  colnames() %>% 
+  cat
+

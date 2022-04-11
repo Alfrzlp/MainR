@@ -45,7 +45,9 @@ spectral_decomposition <- function(A){
   ))
 }
 deviation_matrix <- function(X) return(X - matrix(colMeans(X), nrow  = nrow(X), ncol = ncol(X), byrow = T))
-
+deviation_matrix <- function(X) sweep(X, 2L, colMeans(X))
+# deafult dari var() adalah pakai S yang unbias
+# pakai var sample atau populasi nilai R tetap
 
 
 # 2.1 ---------------------------------------------------------------------

@@ -7,6 +7,7 @@
 
 if (interactive()) {
   cat("\014")
+  cat("\f")
   # suppressMessages(require(devtools))
   suppressMessages(suppressWarnings(require(tidyverse)))
   suppressMessages(suppressWarnings(require(crayon)))
@@ -29,7 +30,8 @@ if (interactive()) {
   cat(cyan(italic('tidyverse :')), ivory('sudah diload'), '\n')
   cat(lime(italic('Selamat beraktivitas ...')), '\n\n')
   print(tidyverse_conflicts())
-  rm(salam, jam)
+  options(prompt = lime('~> '))
+  rm(salam, jam, ivory)
 }
 
 

@@ -1,3 +1,4 @@
+# 3.10, 3.14, 3.19, 3.6
 library(MASS)
 
 X <- matrix(c(9, 1, 5, 3, 1, 2), nrow = 3, byrow = T)
@@ -111,13 +112,27 @@ det(cov(X))
 
 
 library(plotly)
-plot_ly(
-  x = d[1, ], y = d[2, ], z = d[3, ],
-  type = "scatter3d",
-  mode = "lines+markers"
-)
+d %>% 
+  t() %>% 
+  rbind(
+    matrix(0, ncol = 3, nrow = 3)
+  ) %>% 
+  `colnames<-`(c('x', 'y', 'z')) %>% 
+  as.data.frame() %>% 
+  mutate(
+    group = rep(c('d1', 'd2', 'd3'), 2)
+  ) %>% 
+  plot_ly(
+    x = ~x, y = ~y, z = ~z
+  ) %>% 
+  add_lines(color = ~group)
 
 
+
+plot_ly() %>% 
+  add_surface(
+    x = d[1, ], y = d[2, ], z = ~ d[3, ]
+  )
 
 # c. Total sample variance
 # Sigma Sii
@@ -353,7 +368,95 @@ t(b) %*% S %*% c
 
 
 # 3.18 --------------------------------------------------------------------
+xbar <- matrix(c(0.766, 0.508, 0.438, 0.161))
+S <- matrix(c(0.856, 0.635, 0.173, 0.096,
+              0.635, 0.568, 0.127, 0.067, 
+              0.173, 0.128, 0.171, 0.039,
+              0.096, 0.067, 0.039, 0.043),
+            4)
+S
+# a. sample mean, sample variance of total
+# karena total maka isinya x1 + x2 + x3 + x4
+a <- matrix(1, nrow = nrow(xbar))
+t(a) %*% xbar
+t(a) %*% S %*% a
+
+
+# a. sample mean, sample variance dari x1 - x2
+b <- matrix(c(1, -1, 0, 0))
+t(b) %*% xbar
+t(b) %*% S %*% b
+
+# sample covariance
+t(b) %*% S %*% a
 
 
 
-styler::style_file("C:/Users/Ridson Alfarizal/Documents/MainR/all/APG/APG - 03.R")
+# 3.19 --------------------------------------------------------------------
+# buktikan |S| = (s11 s22 s33)|R|
+
+S <- S[1:3, 1:3]
+V12 <- diag(sqrt(diag(S)))
+V12
+(R <- solve(V12) %*% S %*% solve(V12))
+
+
+(shasil <- prod(diag(S)) * det(R))
+det(S)
+
+all.equal(hasil, det(S))
+# terbukti
+
+
+# 3.20 --------------------------------------------------------------------
+dm::read_img(bahasa = 'eng', to_df = T, quote = F, row.names = F)
+
+s <- '12.5	13.7
+14.5	16.5
+8	17.4
+9	11
+19.5	23.6
+8	13.2
+9	32.1
+7	12.3
+7	11.8
+9	24.4
+6.5	18.2
+10.5	22
+10	32.5
+4.5	18.7
+7	15.8
+8.5	15.6
+6.5	12
+8	12.8
+3.5	26.1
+8	14.5
+17.5	42.3
+10.5	17.5
+12	21.8
+6	10.4
+13	25.6
+'
+
+dat <- dm::read_string(s, col_names = c('x1', 'x2'))
+head(dat)
+X <- unname(as.matrix(dat))
+X
+
+# a.
+(xbar <- matrix(colMeans(X)))
+(S <- var(X))
+# sample mean and sample variance dari x1 - x2
+a <- matrix(c(-1, 1))
+t(a) %*% xbar
+t(a) %*% S %*% a
+
+
+# b.
+dat$x2 - dat$x1
+mean(dat$x2 - dat$x1)
+var(dat$x2 - dat$x1)
+
+
+# -------------------------------------------------------------------------
+styler::style_file("APG/APG - 03.R")

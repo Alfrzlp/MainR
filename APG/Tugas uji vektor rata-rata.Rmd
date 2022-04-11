@@ -1,0 +1,77 @@
+---
+title: "Uji vektor rata-rata"
+author: "Kelompok 4 3SK3"
+date: "23/3/2022"
+output: 
+  # rmdformats::material:
+  #   lightbox: true
+  # html_document:
+  #   theme: bootstrap
+  #   highlight: haddock
+  #   toc: true
+  #   toc_float: 
+  #     collapsed: false
+  #     smooth_scroll: true
+  prettydoc::html_pretty:
+    theme: cayman
+    highlight: github
+---
+
+
+## Data
+```{r}
+library(readxl)
+
+imunisasi <- read_xlsx('D:/RKD2018_imunisasi.xlsx', sheet = 1)
+head(imunisasi)
+
+X <- as.matrix(imunisasi[, -1])
+X
+```
+
+## Transformasi
+Transformasi kuadrat BCG dan Campak agar data berdistribusi normal multivariate
+```{r}
+X[, c('BCG', 'campak')] <- X[, c('BCG', 'campak')]^2
+X
+```
+
+## Uji vektor rata-rata
+Nilai miu merupakan nilai nasional
+
+H0 : miu = [83.1, 86.9^2, 61.3, 67.6, 77.3^2]
+H1 : miu != [83.1, 86.9^2, 61.3, 67.6, 77.3^2]
+
+```{r}
+miu <- matrix(c(83.1, 86.9^2, 61.3, 67.6, 77.3^2))
+xbar <- matrix(colMeans(X))
+S <- var(X)
+n <- nrow(X)
+p <- ncol(X)
+alpha <- 0.05
+
+T2 <- n * t(xbar - miu) %*% solve(S) %*% (xbar - miu)
+T2
+nilai_kritis <- (n - 1) * p * qf(alpha, p, n - p, lower.tail = F) / (n - p)
+nilai_kritis
+```
+
+Keputusan : Karena nilai T^2 = 10.326 < 14.482 maka keputusan gagal Tolak Ho
+Kesimpulan : Dengan tingkat signifikansi 5% dan berdasarkan data sampel yang ada maka telah cukup bukti untuk menyatakan bahwa nilai miu tidak berbeda signifikan dengan [83.1, 86.9^2, 61.3, 67.6, 77.3^2]
+
+## Dengan Package MVTests
+```{r warning=F, message=FALSE}
+library(MVTests)
+
+result <- OneSampleHT2(X, mu0 = miu, alpha = 0.05)
+summary(result)
+```
+
+## Selang kepercayaan
+```{r}
+s.ci(xbar, S, n)
+```
+```{r}
+bon.ci(xbar, S, n)
+```
+
