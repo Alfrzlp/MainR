@@ -132,3 +132,61 @@ ggsave2(
   width = 10,
   height = 5
 )
+
+
+# Beberapa lainnya --------------------------------------------------------
+s <- 'Rumah Tangga Menerima KUR	2.15	667
+Rumah Tangga Menerima Kredit BPR	0.29	76
+Rumah Tangga Menerima PKH	2.67 836
+Rumah Tangga Menerima BNPT	3.73 1147'
+
+
+dat <- dm::read_pattern(
+  s, pos_non_angka = 1:2,
+  pos_angka = 3
+) %>% 
+  dplyr::select(p = v2, kat = v1, freq = v3)  %>% 
+  type_convert()
+  
+
+dat <- 
+  dm::read_pattern(
+    s, pos_non_angka = 1:2,
+    pos_angka = 3
+  ) %>% 
+  dplyr::select(-v2, kat = v1, freq = v3) %>% 
+  type_convert() %>% 
+  mutate(
+    p = freq*100/33196
+  )
+
+ggplot(dat, aes(x = reorder(kat, p), y = p/100, fill = p/100)) +
+  geom_bar(stat = 'identity') +
+  geom_text(aes(label = scales::percent(p/100)), nudge_y = 0.003) +
+  scale_y_continuous(labels = scales::percent) +
+  scale_x_discrete(labels = function(x) str_pad(str_wrap(x, 15), side = 'both', width = 20, pad = ' ')) +
+  scale_fill_gradient(low = "orange4", high = "#E4CFA1",labels = scales::percent) +
+  labs(
+    x = 'Kategori',
+    y = 'Persentase',
+    title = str_wrap('Penerimaan BPUM disertai Program Lainnya pada Rumah Tangga Usaha Mikro', 50),
+    fill = NULL
+  ) +
+  theme_minimal(base_line_size = 0.7) +
+  theme(
+    title = element_text(size = 9.5),
+    axis.text.y = element_text(hjust = 0)
+  )
+
+
+
+ggsave(
+  filename = "E:/Visualisasi/kategori.png",
+  width = 6,
+  height = 3,
+  units = "in",
+  dpi = 300,
+  scale = 0.9,
+  bg = 'white'
+)
+
