@@ -4,7 +4,7 @@ create_package("C:/Users/Ridson Alfarizal/Documents/coba")
 use_git()
 
 # membuat atau edit fungsi nya
-use_r("read_string")
+use_r("separator_convert")
 
 # simulates the process of building, installing,
 # attaching the package
@@ -18,10 +18,12 @@ use_mit_license("Ridson Alfarizal")
 # menulis dokumntasi fungsi
 # taruh cursor di fungsi -> code -> insert roxygen skeleton
 document()
+
 ?str2vec
 ?read_img
 ?dm
 ?bpjs
+?separator_convert
 
 # check lagi setelah tambah dokumentasi
 check()
@@ -32,6 +34,7 @@ devtools::install_github("")
 # maka restart r session
 install()
 
+
 # jika pakai package
 use_package("stringr")
 use_package("reticulate")
@@ -39,6 +42,7 @@ use_package("tesseract")
 use_package("tidyr")
 use_package("dplyr")
 use_package("zeallot")
+use_package("crayon")
 
 # Data --------------------------------------------------------------------
 bpjs <- read.csv("D:/_Datasets/case_cost_prediction_train.csv")

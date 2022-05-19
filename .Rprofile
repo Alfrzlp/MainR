@@ -8,6 +8,7 @@
 if (interactive()) {
   cat("\014")
   cat("\f")
+  extrafont::loadfonts(device = "win")
   # suppressMessages(require(devtools))
   suppressMessages(suppressWarnings(require(tidyverse)))
   suppressMessages(suppressWarnings(require(crayon)))
