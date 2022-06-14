@@ -1,9 +1,31 @@
+if(!'devtools' %in% installed.packages()[, 'Package']){
+  install.packages('devtools')
+}
+devtools::install_github('alfrzlp/package-dm')
+
+
+library(tidyverse)
 library(dm)
+library(scales)
+x <- seq(0.01, 1, length = 100)
+
+my_conflict_prefer()
+
+# tasik
+# -------------------------------------------------------------------------
+s1 <- 'Ya	0	8	2	0
+Tidak	8	0	6	8'
+
+s2 <- 'Ya	0	3	1	0
+Tidak	3	0	2	3'
+
+s3 <- 'Ya	0	5	1	0
+Tidak	5	0	4	5'
 
 # bandung
 # -------------------------------------------------------------------------
-s <- 'Ya	2	14	1	10
-Tidak	13	1	14	5'
+s1 <- 'Ya	2	14	10	1
+Tidak	13	1	5	14'
 
 s2 <- 'Ya 1.00	6.00	3.00	1.00
 Tidak 5.00	0.00	3.00	5.00'
@@ -12,15 +34,6 @@ s3 <- 'Ya 1	18	9	1
 Tidak 17	0	9	17'
 
 
-# -------------------------------------------------------------------------
-s <- 'Ya	0	8	2	0
-Tidak	8	0	6	8'
-
-s1 <- 'Ya	0	3	1	0
-Tidak	3	0	2	3'
-
-s3 <- 'Ya	0	5	1	0
-Tidak	5	0	4	5'
 
 
 # -------------------------------------------------------------------------
@@ -28,9 +41,10 @@ my_col <- c('#20ac4b', '#0a5445')
 name_lvl <- c('Tanaman Pangan',	'Tanaman Hortikultura',	'Budidaya Perikanan',	'Peternakan')
 
 
-dat <- read_string(s) %>% 
+dat <- read_string(s1) %>% 
+  # Atur nama Kolom
   setNames(
-    c('status', 'Tanaman Pangan',	'Tanaman Hortikultura',	'Budidaya Perikanan', 'Peternakan')
+    c('status', 'Tanaman Pangan',	'Tanaman Hortikultura', 'Budidaya Perikanan', 'Peternakan')
   ) %>% 
   pivot_longer(-status) %>% 
   type_convert() %>% 
@@ -55,6 +69,8 @@ dat2 <- read_string(s2) %>%
   ungroup()
 dat2
 
+
+
 dat3 <- read_string(s3) %>% 
   setNames(
     c('status', 'Tanaman Pangan',	'Tanaman Hortikultura', 'Budidaya Perikanan', 'Peternakan')
@@ -70,15 +86,10 @@ dat3 <- read_string(s3) %>%
 
 
 
-x <- seq(0.01, 1, length = 100)
-library(scales)
-dat3 %>% 
-  mutate(
-    label = ifelse(round(p, 2) %in% x, percent(p, accuracy = 1), percent(p, accuracy = 0.01))
-  )
-
 
 # -------------------------------------------------------------------------
+# ganti dat dengan dat2 atau dat3
+
 dat3 %>% 
   mutate(
     label = ifelse(p %in% x, percent(p, accuracy = 1), percent(p, accuracy = 0.01))
@@ -90,16 +101,16 @@ dat3 %>%
   ) +
   geom_text(
     data = ~ .x %>%
-      filter(p > 0.07),
+      filter(p > 0.05),
     aes(label = label, color = status),
     position = position_stack(vjust = 0.55)
   ) +
-  geom_text(
-    data = ~ .x %>%
-      filter(p < 0.07, p > 0),
-    aes(label = label, color = status),
-    position = position_stack(vjust = 0.73)
-  ) +
+  # geom_text(
+  #   data = ~ .x %>%
+  #     filter(p < 0.07, p > 0),
+  #   aes(label = label, color = status),
+  #   position = position_stack(vjust = 0.73)
+  # ) +
   scale_fill_manual(
     values = my_col
   ) +
@@ -133,3 +144,33 @@ ggsave(
   scale = 0.95,
   bg = 'white'
 )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# tasik
+# -------------------------------------------------------------------------
+s <- 'Ya	0	8	2	0
+Tidak	8	0	6	8'
+
+s1 <- 'Ya	0	3	1	0
+Tidak	3	0	2	3'
+
+s3 <- 'Ya	0	5	1	0
+Tidak	5	0	4	5'

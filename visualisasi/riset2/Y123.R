@@ -1,21 +1,19 @@
 library(tidyverse)
 library(classInt)
 library(openxlsx)
-library(ggrepel)
 library(rgeoda)
 library(spdep)
+
+library(ggrepel)
 library(sf)
 
 
-# - Kasih batas antara kecamatan di KBB dan KPWK, kasih garis batas antar kabupaten kek peta misalnya
-# - Kasih judul peta --> "Peta Klasifikasi Laju Alih Fungsi Lahan Kabupaten Bandung Barat dan Purwakarta Tahun 2013-2021"
-# - Kasih keterangan/judul legenda -->  Kelas Laju Alih Fungsi Lahan Natural Break (%)
-# 
-# - Judul scatterplotnya "Scatterplot Moran's I Y1" 
-# - Judul peta klaster LISA nya "Klaster LISA Y1"
-
 # color -------------------------------------------------------------------
 my_col <- c('#006D2C', '#20AC4B', '#7AC27F', '#A4D29F','#CFE6CA')
+
+# revisi
+# my_col <- c('#b3242a', '#fba683', '#f5f5f2', "#7ccdc1", "#2f9790")
+my_col <- c('#8b510a', '#e1c27b', '#F6E8C1', "#7ccdc1", "#2f9790")
 my_col_lisa <- c('gray70', 'tomato', 'skyblue3', 'orange', 'steelblue', 'black', 'black')
 
 
@@ -23,6 +21,9 @@ my_col_lisa <- c('gray70', 'tomato', 'skyblue3', 'orange', 'steelblue', 'black',
 bb_shape <- st_read("E:/CitraRiset2/bb_LajuLuas.geojson")
 pwk_shape <- st_read("E:/CitraRiset2/pwk_LajuLuas.geojson")
 gab <- rbind(bb_shape, pwk_shape)
+
+gab <- st_read('E:/CitraRiset2/gab.geojson')
+batas_kab <- st_read('E:/CitraRiset2/batas_kabBBPWK.geojson')
 
 
 # Data Excel --------------------------------------------------------------
@@ -66,16 +67,21 @@ get_labelBr <- function(br){
 brY1 <- c(35.505, 44.449, 58.819, 66.419)
 brY2 <- c(-7.816, -1.625, 3.126, 6.782)
 brY3 <- c(-0.102, -0.016, 0.031, 0.062)
+brTahunan <- c(4.438, 5.556, 7.352, 8.302)
 
 label_brY1 <- get_labelBr(brY1)
 label_brY2 <- get_labelBr(brY2)
 label_brY3 <- get_labelBr(brY3)
+label_brThn <- get_labelBr(brTahunan)
 
 
 gab <- gab %>% 
   mutate(
     Y2 = round(Y2, 3),
     Y3 = round(Y3, 3),
+    Y1_tahunan = round(y1_tahunan, 3),
+    
+    
     Y1_nb = case_when(
       Y1 < brY1[1] ~ 1,
       Y1 >= brY1[1] & Y1 < brY1[2] ~ 2,
@@ -97,9 +103,18 @@ gab <- gab %>%
       Y3 >= brY3[3] & Y3 < brY3[4] ~ 4,
       Y3 >= brY3[4] ~ 5
     ),
+    Y1_thn_nb = case_when(
+      y1_tahunan < brTahunan[1] ~ 1,
+      y1_tahunan >= brTahunan[1] & y1_tahunan < brTahunan[2] ~ 2,
+      y1_tahunan >= brTahunan[2] & y1_tahunan < brTahunan[3] ~ 3,
+      y1_tahunan >= brTahunan[3] & y1_tahunan < brTahunan[4] ~ 4,
+      y1_tahunan >= brTahunan[4] ~ 5
+    ),
+    
     Y1_nb = factor(Y1_nb, levels = 1:5, labels = label_brY1),
     Y2_nb = factor(Y2_nb, levels = 1:5, labels = label_brY2),
-    Y3_nb = factor(Y3_nb, levels = 1:5, labels = label_brY3)
+    Y3_nb = factor(Y3_nb, levels = 1:5, labels = label_brY3),
+    Y1_thn_nb = factor(Y1_thn_nb, levels = 1:5, labels = label_brThn)
   )
 
 # Centroid ----------------------------------------------------------------
@@ -123,23 +138,20 @@ gab$Y_cen <- cent$Y
 # batas_kab <- st_as_sf(batas_kab)
 # batas_kab
 
-batas_kab <- st_read('E:/CitraRiset2/batas_kabBBPWK.geojson')
-batas_kab
 # Peta Y1 ------------------------------------------------------------------
 
-gab <- st_read('E:/CitraRiset2/gab.geojson')
 
 
 ggplot(data = gab) +
   geom_sf(
-    aes(fill = Y2_nb), color = "white",
+    aes(fill = Y1_nb), color = "white",
     size = 0.3
   ) +
   geom_sf(
     data = batas_kab,
     color = 'gray30',
     fill = 'transparent',
-    size = 0.5,
+    size = 0.55,
     inherit.aes = F
   ) +
   geom_label_repel(
@@ -194,12 +206,17 @@ ggplot(data = gab) +
     size = 0.7
   ) +
   scale_fill_manual(
-    values = rev(my_col)
+    values = my_col
   ) +
+  # scale_fill_brewer(
+  #   palette = 'RdYlGn',
+  # ) +
   labs(
-    title = 'Peta Klasifikasi Laju Perubahan Lahan Sawah Tahunan',
+    title = 'Laju Persentase Alih Fungsi Lahan Sawah Tahunan',
+    # title = 'Peta Klasifikasi Laju Perubahan Lahan Sawah Tahunan',
     subtitle = 'Kabupaten Bandung Barat dan Kabupaten Purwakarta Tahun 2013-2021',
-    fill = str_wrap('Kelas Laju Perubahan Lahan Sawah Tahunan Natural Break (%)', 25), 
+    # fill = str_wrap('Kelas Laju Perubahan Lahan Sawah Tahunan Natural Break (%)', 25), 
+    fill = str_wrap('Kelas Laju Persentase Alih Fungsi Lahan Sawah Tahunan Natural Break (%)', 25),
     x = 'Longitude', y = 'Latitude'
   ) +
   theme_bw() +
@@ -212,7 +229,7 @@ ggplot(data = gab) +
 
 
 ggsave(
-  filename = "E:/Visualisasi/riset/Y2/y2_laju_rev.png",
+  filename = "E:/Visualisasi/riset/Y1/y1_laju_warna.png",
   width = 7,
   height = 6.5,
   units = "in",
@@ -231,18 +248,21 @@ ww_gab <- nb2listw(w_gab)
 gab_moran1 <- moran(gab$Y1, ww_gab, n = length(ww_gab$neighbours), S0 = Szero(ww_gab))
 gab_moran2 <- moran(gab$Y2, ww_gab, n = length(ww_gab$neighbours), S0 = Szero(ww_gab))
 gab_moran3 <- moran(gab$Y3, ww_gab, n = length(ww_gab$neighbours), S0 = Szero(ww_gab))
+gab_moran4 <- moran(gab$y1_tahunan, ww_gab, n = length(ww_gab$neighbours), S0 = Szero(ww_gab))
 
 
 dat <- data.frame(
   x1 = scale(gab$Y1),
   x2 = scale(gab$Y2),
   x3 = scale(gab$Y3),
+  x4 = scale(gab$Y1_tahunan),
   nmkec = str_to_title(gab$nmkec)
 ) %>% 
   mutate(
     y1 = lag.listw(ww_gab, x1),
     y2 = lag.listw(ww_gab, x2),
     y3 = lag.listw(ww_gab, x3),
+    y4 = lag.listw(ww_gab, x4),
     .before = nmkec
   )
 
@@ -263,6 +283,7 @@ dat <- dat %>%
     cluster1 = get_cluster(x1, y1),
     cluster2 = get_cluster(x2, y2),
     cluster3 = get_cluster(x3, y3),
+    cluster4 = get_cluster(x4, y4),
     across(starts_with('cluster'), ~ factor(.x, levels = cluster_lvl))
   )
 
@@ -386,7 +407,7 @@ lisaY2$p_vals
 # Y1
 ggplot(data = gab) +
   geom_sf(
-    aes(fill = cluster2), 
+    aes(fill = cluster1), 
     color = "white",
     size = 0.15
   ) +
@@ -399,7 +420,7 @@ ggplot(data = gab) +
   ) +
   geom_point(
     data = ~.x %>% 
-      dplyr::filter(!cluster2 %in% c('Not significant')),
+      dplyr::filter(!cluster1 %in% c('Not significant')),
     aes(
       x = X_cen, y = Y_cen
     ),
@@ -410,7 +431,7 @@ ggplot(data = gab) +
   geom_label_repel(
     data = ~.x %>% 
       dplyr::filter(
-        !cluster2 %in% c('Not significant')
+        !cluster1 %in% c('Not significant')
       ),
     aes(
       label = str_wrap(str_to_title(nmkec), 15),
@@ -436,7 +457,8 @@ ggplot(data = gab) +
     labels = function(x) str_wrap(x, 10)
   ) +
   labs(
-    title = "Peta Klaster Lisa Laju Perubahan Lahan Sawah Tahunan",
+    # title = "Peta Klaster Lisa Laju Perubahan Lahan Sawah Tahunan",
+    title = "Peta Klaster LISA Laju Persentase Alih Fungsi Lahan Sawah Tahunan",
     subtitle = 'Kabupaten Bandung Barat dan Kabupaten Purwakarta',
     x = 'Longitude', y = 'Latitude', fill = 'cluster'
   ) +
@@ -569,7 +591,7 @@ ggplot(data = gab) +
 
 
 ggsave(
-  filename = "E:/Visualisasi/riset/Y2/y2_lisa.png",
+  filename = "E:/Visualisasi/riset/Y1/y1_lisa_rev.png",
   width = 7,
   height = 6.5,
   units = "in",
@@ -693,8 +715,8 @@ ggsave(
 # Revisi Moran ------------------------------------------------------------
 dat %>% 
   # ganti ini
-  ggplot(aes(x = x2, y = y2)) +
-  geom_point(aes(col = cluster2), size = 2.5) +
+  ggplot(aes(x = x1, y = y1)) +
+  geom_point(aes(col = cluster1), size = 2.5) +
   
   geom_vline(xintercept = 0, color = "gray60", lty = 5) +
   geom_hline(yintercept = 0, color = "gray60", lty = 5) +
@@ -702,7 +724,7 @@ dat %>%
   
   geom_text_repel(
     # ganti ini
-    aes(color = cluster2, label = str_to_title(nmkec)),
+    aes(color = cluster1, label = str_to_title(nmkec)),
     size = 3,
     min.segment.length = 0,
     seed = 0,
@@ -718,27 +740,29 @@ dat %>%
   scale_color_manual(
     values = c("red", "orange", "skyblue3", "navy")
   ) +
+  coord_cartesian(clip = 'off', xlim = c(-2, 2)) +
   labs(
     y = "Spatial Lag",
     x = "Laju Alih Fungsi Lahan",
-    title = "Scatterplot Moran's I Laju Perubahan Lahan Sawah Tahunan",
-    subtitle = paste0("Moran's I: ", round(gab_moran2$I, 4))
+    # title = "Scatterplot Moran's I Laju Perubahan Lahan Sawah Tahunan",
+    title = "Scatterplot Moran's I Laju Persentase Alih Fungsi Lahan Sawah Tahunan",
+    subtitle = paste0("Moran's I: ", round(gab_moran1$I, 4))
   ) +
   theme_bw(base_family = 'Arial') +
   theme(
     legend.position = "none",
     plot.title = element_text(face = 2),
-    plot.subtitle = element_text(colour = 'gray30')
-  ) +
-  xlim(c(-2, 2))
+    plot.subtitle = element_text(colour = 'gray30'),
+    plot.margin = margin(5.5, r = 15, 5.5, 5.5, "points")
+  ) 
 
 
 
 
 
 ggsave(
-  filename = "E:/Visualisasi/riset/Y2/y2_moran.png",
-  width = 7,
+  filename = "E:/Visualisasi/riset/Y1/y1_moran_rev.png",
+  width = 7.5,
   height = 6,
   units = "in",
   dpi = 500,

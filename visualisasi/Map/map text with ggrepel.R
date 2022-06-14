@@ -1,15 +1,16 @@
 library(dm) 
 
 dat <- read_pattern(
-  'Boalemo 88,35 100,24 102,37 97,01 97,08
-  Kab. Gorontalo 93,58 94,98 93,81 92,67 94,84
-  Pohuwato 95,63 99,02 99,94 94,33 93,86
-  Bone Bolango 88,27 93,82 97,97 94,48 95,43
-  Gorontalo Utara 98,16 99,76 99,14 94,81 95,8
-  Kota Gorontalo 92,99 91,31 91,85 91,52 93,45',
+  'Boalemo	16.15	5.57
+  Kab. Gorontalo	10.01	12.31
+  Pohuwato	23.78	2.21
+  Gorontalo Utara	18.49	11.61
+  Kota Gorontalo 23.04	36.34',
   pos_non_angka = 1,
-  pos_angka = 2:6
+  pos_angka = 2:3
 ) 
+
+
 
 dat <- dat %>% 
   rename(kab = v1) %>% 
@@ -41,8 +42,8 @@ gorontalo <-
   )
 
 gorontalo %>% 
-  ggplot(aes(fill = v6)) +
-  geom_sf(color = 'white') +
+  ggplot() +
+  geom_sf(fill = 'steelblue', color = 'white') 
   # geom_sf_text(
   #   data = ~.x %>% 
   #     dplyr::filter(NAME_2 != 'Danau Limboto'),

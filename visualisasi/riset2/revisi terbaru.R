@@ -9,6 +9,7 @@ s <-
   'Bandung Barat	33	17.0	113	58.2	48	24.8
 Purwakarta	24	24.2	42	42.4	33	33.4'
 
+
 jrt_lvl <- c("Di Bawah Rata-rata (1-2)", 'Sekitar Rata-rata (3-4)', 'Di Atas Rata-rata (>4)')
 
 

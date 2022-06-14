@@ -115,3 +115,36 @@ viz_col <- function(my_col){
     asp = 1
   )
 }
+
+
+
+
+
+# -------------------------------------------------------------------------
+guide_squarekey <- function(...) {
+  # Constructor just prepends a different class
+  x <- guide_legend(...)
+  class(x) <- c("squarekey", class(x))
+  x
+}
+
+guide_gengrob.squarekey <- function(guide, theme) {
+  legend <- NextMethod()
+  is_key <- startsWith(legend$layout$name, "key-")
+  is_key_bg <- is_key & endsWith(legend$layout$name, "-bg")
+  is_key <- is_key & !endsWith(legend$layout$name, "-bg")
+  
+  key_col <- unique(legend$layout$l[is_key])
+  keywidth <- grid::convertUnit(legend$widths[2], "mm", valueOnly = TRUE)
+  
+  legend$grobs[is_key] <- lapply(legend$grobs[is_key], function(key) {
+    key$height <- unit(keywidth - 0.5, "mm")
+    key
+  })
+  legend$grobs[is_key_bg] <- lapply(legend$grobs[is_key_bg], function(bg) {
+    bg$height <- unit(keywidth, "mm")
+    bg
+  })
+  legend
+}
+

@@ -245,3 +245,29 @@ ggsave(
   bg = "white"
 )
 
+
+
+# void --------------------------------------------------------------------
+ggplot(data = bb_shape) +
+  geom_sf(
+    aes(fill = ls), color = "white",
+    size = 0.3
+  ) +
+  scale_fill_manual(
+    values = rev(my_col),
+    labels = label_br
+  ) +
+  theme_void() +
+  theme(
+    legend.position = 'none'
+  )
+
+
+ggsave(
+  filename = "E:/Visualisasi/riset/estimasi luas/estimasi_luas_bb_void.png",
+  width = 7,
+  height = 5,
+  units = "in",
+  dpi = 500,
+  scale = 1
+)

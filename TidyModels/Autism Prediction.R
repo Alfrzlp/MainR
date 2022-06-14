@@ -26,7 +26,9 @@ glimpse(df_test)
 # class
 df_train %>% 
   group_by(class_asd) %>% 
-  count()
+  count() %>% 
+  ungroup() %>% 
+  mutate(p = n/sum(n))
 
 
 # n unique
@@ -47,6 +49,9 @@ df_test[n_unique$variabel] %>%
 
 
 
+
+
+
 # Final Datasets ----------------------------------------------------------
 df_train <- 
   df_train %>% 
@@ -62,7 +67,8 @@ df_train <-
   ) %>% 
   ungroup() %>% 
   mutate(
-    kat_score = ifelse(score >= 6, 'baik', 'jelek')
+    kat_score = ifelse(score >= 6, 'baik', 'jelek'),
+    test_vs_result = score / result
   )
 
 
@@ -81,7 +87,8 @@ df_test <-
   ) %>% 
   ungroup() %>% 
   mutate(
-    kat_score = ifelse(score >= 6, 'baik', 'jelek')
+    kat_score = ifelse(score >= 6, 'baik', 'jelek'),
+    test_vs_result = score / result
   )
   
 
@@ -95,6 +102,14 @@ glimpse(df_test)
 
 
 # EDA ---------------------------------------------------------------------
+
+df_train %>% 
+  select(id, ends_with('score'), class_asd, -kat_score) %>% 
+  pivot_longer(-c(class_asd, id)) 
+  ggplot(aes(y = name, fill = class_asd)) +
+  geom_bar(position = position_dodge())
+
+
 # score
 ggplot(df_train, aes(x = score, fill = class_asd)) +
   geom_bar(position = position_dodge()) +
@@ -169,12 +184,20 @@ set.seed(1)
 val_set <- validation_split(
   train_set, 
   strata = class_asd, 
-  prop = 0.9
+  prop = 0.8
 )
 val_set
 
 
-# Simple Model ------------------------------------------------------------
+
+# Model -------------------------------------------------------------------
+rf_model <-
+  mlp(hidden_units = tune(), penalty = tune(), epochs = tune()) %>%
+  set_engine('nnet') %>%
+  set_mode('classification')
+
+
+
 cores <- parallel::detectCores()
 cores
 
@@ -182,9 +205,17 @@ rf_model <-
   logistic_reg(penalty = tune(), mixture = 1) %>% 
   set_engine('glmnet') 
 
+rf_model <- 
+  rand_forest(mtry = tune(), trees = tune(), min_n = tune()) %>% 
+  set_engine('ranger', num.threads = 3) %>% 
+  set_mode('classification')
+  
+
+
+
 rf_model <-
   boost_tree(tree_depth = tune(), trees = tune(), learn_rate = tune(), min_n = tune(), loss_reduction = tune(), sample_size = tune(), stop_iter = tune()) %>%
-  set_engine('xgboost') %>%
+  set_engine('xgboost', num.threads = cores) %>%
   set_mode('classification')
 
 
@@ -192,18 +223,15 @@ rf_model <-
 # recipe
 rf_recipe <- 
   recipe(
-    class_asd ~ score + kat_score + result + austim + a1_score + a2_score + a3_score + a4_score + a5_score + a6_score + a7_score + a8_score + a9_score + a10_score + used_app_before + ethnicity + relation + jaundice + age + gender,
+    class_asd ~ a1_score + a2_score + a3_score + a4_score + a5_score + a6_score + a7_score + a8_score + a9_score + a10_score + age + result + gender + test_vs_result,
     data = train_set) %>% 
-  # step_rm(id) %>%
-  step_string2factor(all_nominal_predictors()) %>% 
-  step_interact(terms = ~ gender:score) %>% 
-  # step_other(contry_of_res, threshold = 0.2) %>% 
+  # add_role(id, new_role = "id") %>%
+  step_string2factor(all_nominal_predictors()) %>%
   step_impute_mode(all_nominal_predictors()) %>% 
-  themis::step_upsample(class_asd, over_ratio = 0.9) %>%
+  # step_interact(terms = ~ gender:score) %>% 
+  # step_other(contry_of_res, threshold = 0.2) %>% 
   step_dummy(all_nominal_predictors(), -all_outcomes()) %>% 
-  step_zv(all_predictors()) %>% 
-  step_YeoJohnson(c(result, age)) %>% 
-  step_pca(ends_with('_score'))
+  themis::step_smote(class_asd, over_ratio = 0.9, seed = 1, column = -all_nominal())
 
 
 # workflow
@@ -221,15 +249,16 @@ rf_res <-
   rf_workflow %>% 
   tune_grid(
     val_set,
-    grid = 200,
-    control = control_grid(save_pred = TRUE),
-    metrics = metric_set(roc_auc)
+    grid = lr_grid,
+    control = control_grid(save_pred = TRUE, verbose = T, allow_par = T),
+    metrics = metric_set(accuracy)
   )
 
 
 rf_res %>% 
   collect_metrics() %>% 
-  arrange(desc(mean))
+  arrange(desc(mean)) %>% 
+  select(mean)
 
 rf_res %>% 
   select_best()
@@ -275,16 +304,26 @@ final_fit
 
 
 # Hasil -------------------------------------------------------------------
-df_train %>% 
-  bind_cols(predict(final_fit, .)) %>% 
-  conf_mat(truth = class_asd, .pred_class)
-
-
 autism_metric <- metric_set(f_meas, accuracy, sensitivity)
 
 df_train %>% 
   bind_cols(predict(final_fit, .)) %>% 
+  conf_mat(truth = class_asd, .pred_class)
+
+df_train %>% 
+  bind_cols(predict(final_fit, .)) %>% 
   autism_metric(truth = class_asd, estimate = .pred_class)
+
+
+# test
+test_set %>% 
+  bind_cols(predict(final_fit, .)) %>% 
+  conf_mat(truth = class_asd, estimate = .pred_class)
+
+test_set %>% 
+  bind_cols(predict(final_fit, .)) %>% 
+  autism_metric(truth = class_asd, estimate = .pred_class)
+
 
 
 # Predict -----------------------------------------------------------------
@@ -295,6 +334,7 @@ hasil <-
   )
 
 head(hasil)
+table(hasil$`Class/ASD`)
 
 hasil %>% 
   write.csv('E:/sub.csv', row.names = F, quote = F)  
@@ -304,3 +344,4 @@ hasil %>%
 system(
   'kaggle competitions submit -c autismdiagnosis -f E:/sub.csv -m "Message"'
 )
+

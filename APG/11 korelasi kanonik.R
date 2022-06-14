@@ -1,0 +1,93 @@
+library(dplyr)
+
+s <- '1 41.5 45.9 11.2 162 23.0 3.0
+2 33.8 53.3 11.2 162 23.0 8.0
+3 27.7 57.5 12.7 162 30.0 5.0
+4 21.7 58.8 16.0 162 30.0 8.0
+5 19.9 60.6 16.2 172 25.0 5.0
+6 15.0 58.0 22.6 172 25.0 8.0
+7 12.2 58.6 24.5 172 30.0 5.0
+8 4.3 52.4 38.0 172 30.0 8.0
+9 19.3 56.9 21.3 167 27.5 6.5
+10 6.4 55.4 30.8 177 27.5 6.5
+11 37.6 46.9 14.7 157 27.5 6.5
+12 18.0 57.3 22.2 167 32.5 6.5
+13 26.3 55.0 18.3 167 22.5 6.5
+14 9.9 58.9 28.0 167 27.5 9.5
+15 25.0 50.3 22.1 167 27.5 3.5
+16 14.1 61.1 23.0 177 20.0 6.5
+17 15.2 62.9 20.7 177 20.0 6.5
+18 15.9 60.0 22.1 160 34.0 7.5
+19 19.6 60.6 19.3 160 34.0 7.5
+'
+
+dat <- read.table(textConnection(s), header = F) %>% 
+  dplyr::select(-1) %>% 
+  setNames(c('X1', 'X2', 'X3', 'X4', 'X5', 'X6'))
+
+dat <- scale(dat)
+dat
+
+X1 <- dat[, 1:3]
+X2 <- dat[, 4:6]
+
+X1
+X2
+
+
+
+# -------------------------------------------------------------------------
+res.cc <- candisc::cancor(X1, X2)
+summary(res.cc)
+
+# artinya hubungan antara Gugus X1 dengan Gugus X2 sebesar 0.98153
+# (cukup kuat)
+
+
+# Interpretasi: Nilai korelasi antar gugus peubah X1 dan X2 terhadap fungsi 
+# kanonik pertama menunjukkan terdapat hubungan positif  yang erat dan 
+# memberikan kontribusi yang cukup besar.
+
+
+
+# Uji hipotesis menunjukkan bahwa 
+# korelasi kanonik pertama berbeda 
+# nyata. Artinya korelasi kanonik 
+# yang dapat digunakan untuk 
+# menjelaskan hubungan antar gugus 
+# peubah X dan Y adalah satu korelasi 
+# kanonik.
+
+
+N <- 19
+p <- ncol(X1)
+q <- ncol(X2)
+rho <- res.cc$cor
+
+p.asym
+CCP::p.asym(rho, N, p, q)
+
+# -------------------------------------------------------------------------
+res_cc <- CCA::cc(X1, X2)
+
+# Korelasi X1 dengan U
+res_cc$scores$corr.X.xscores
+# Korelasi X1 dengan V
+res_cc$scores$corr.X.yscores
+
+
+
+# Korelasi X2 dengan V
+res_cc$scores$corr.Y.yscores
+# Korelasi X2 dengan U
+res_cc$scores$corr.Y.xscores
+
+
+var(res_cc$xcoef)
+
+
+# kelompok 1 dan 2 masing2 diuji multivariat normality
+
+
+
+pf(2.846203, 6.788, 26.212, lower.tail = F)
