@@ -345,3 +345,40 @@ system(
   'kaggle competitions submit -c autismdiagnosis -f E:/sub.csv -m "Message"'
 )
 
+
+
+
+
+
+
+
+
+library(calibrateBinary)
+library(randomForest)
+mod = randomForest(x = x_train,
+                  y = df_train$class_asd,
+                  ntree = 1500, mtry = 10, replace = T)
+
+preds <- predict(mod, newdata = df_test)
+table(preds)
+
+
+hasil <- 
+  df_sub %>% 
+  mutate(
+    `Class/ASD` = preds
+  )
+
+hasil %>% 
+  write.csv('E:/sub.csv', row.names = F, quote = F)  
+
+
+# kirim submission --------------------------------------------------------
+system(
+  'kaggle competitions submit -c autismdiagnosis -f E:/sub.csv -m "Message"'
+)
+
+
+range01 <- function(x){(x-min(x))/(max(x)-min(x))}
+pred <- ifelse(range01(preds) > 0.75, 1, 0)
+table(pred)

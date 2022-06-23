@@ -1,18 +1,7 @@
-# clearscreen
-
-# Customise the R prompt that prefixes every command
-# (use " " for a blank prompt)
-
-
-
 if (interactive()) {
   cat("\014")
-  cat("\f")
   extrafont::loadfonts(device = "win")
-  # suppressMessages(require(devtools))
   suppressMessages(suppressWarnings(require(tidyverse)))
-  suppressMessages(suppressWarnings(require(crayon)))
-  suppressMessages(suppressWarnings(require(grDevices)))
   
   jam <- as.numeric(str_extract(Sys.time(), pattern = "\\s\\d+"))
   salam <-
@@ -22,17 +11,22 @@ if (interactive()) {
       between(jam, 16, 18) ~ "Selamat Sore",
       between(jam, 19, 24) ~ "Selamat Malam"
     )
-  lime <- make_style(rgb(94, 201, 98, maxColorValue = 255), bg = F)
-  ivory <- make_style("ivory")
+  # lime <- make_style(rgb(94, 201, 98, maxColorValue = 255), bg = F)
+  options(prompt = '~> ')
   
-  cat(lime((ivory(salam, "Ridson..."))))
-  cat(bold("\nSelamat datang di R\n\n"))
+  cli::cli_div(
+    theme = list(
+      span.emph = list(color = "#5EC962"),
+      span.bold = list("font-weight" = "bold", color = 'cyan')
+    )
+  )
   
-  cat(cyan(italic('tidyverse :')), ivory('sudah diload'), '\n')
-  cat(lime(italic('Selamat beraktivitas ...')), '\n\n')
-  print(tidyverse_conflicts())
-  options(prompt = lime('~> '))
-  rm(salam, jam, ivory)
+  cli::cli_h1('{salam} Ridson')
+  cli::cli_alert_success('{.bold Tidyverse} : Sudah diload')
+  cli::cli_alert_success('{.emph  Selamat Beraktivitas...}')
+  cli::cli_blockquote('Jangan malas', citation = 'Ridson')
+  
+  cli::cli_end()
 }
 
 

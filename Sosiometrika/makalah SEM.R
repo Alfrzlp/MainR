@@ -1,10 +1,9 @@
-dat_sem <- readxl::read_xlsx('D:/tugas/dataPA_jatim.xlsx') %>% 
-  select(-c(tpt21, pm21))
-
+dat_sem <- readxl::read_xlsx('D:/tugas/dataPA_jatim.xlsx')
 dat_sem %>% 
   glimpse()
 
 
+# SEM ---------------------------------------------------------------------
 library(lavaan)
 
 full_mod = '
@@ -33,15 +32,15 @@ fitmeasures(mod.est, c('GFI', 'cfi', 'NFI', 'NNFI','SRMR'))
 
 
 # SEM PLS -----------------------------------------------------------------
-pak::pak('seminr')
+# pak::pak('seminr')
 glimpse(dat_sem)
 library(seminr)
 
 miskin_mm <- constructs(
   composite("kemiskinan", c('pm20', 'p1', 'p2')),
-  composite("pendidikan", c('hls', 'amh')),
-  composite('demografi', c('rk', 'kp')),
-  composite("tenaga", c('tpt20'))
+  composite("pendidikan", c('desasd', 'desasmp', 'desaslta', 'amh')),
+  composite('demografi', c('tpt20', 'kp'))
+  # composite("kesehatan", c('desapskms', 'desaapotek', 'desapoliklinik'))
 )
 
 miskin_mm <- as.reflective(miskin_mm)
@@ -49,9 +48,10 @@ miskin_mm <- as.reflective(miskin_mm)
 #Creating structural model
 #path disesuaikan dengan gambar model penelitian
 miskin_sm <- relationships(
-  paths(from = "pendidikan", to = c("kemiskinan", 'tenaga')),
-  paths(from = "tenaga", to = c("kemiskinan")),
-  paths(from = "demografi", to = c("kemiskinan", 'tenaga'))
+  paths(from = "pendidikan", to = c("kemiskinan")),
+  paths(from = "demografi", to = c("kemiskinan"))
+  # paths(from = "kesehatan", to = c("kemiskinan"))
+  # paths(from = "sosial", to = c("kemiskinan"))
 )
 
 
@@ -124,11 +124,16 @@ boot_miskin_model <- bootstrap_model(
 boot_summary <- summary(boot_miskin_model)
 boot_summary
 
+
 # df = 4
 # df = n variabel + n variabel
 boot_summary$bootstrapped_paths
 boot_summary$bootstrapped_total_paths
 
+pt(3.54, 4 + 3, lower.tail = F)
+pt(-0.373, 2 + 3, lower.tail = F)
+
+pt(-3.036, 2 + 3, lower.tail = F)
 
 
 # Rsquare
@@ -140,29 +145,63 @@ plot(boot_miskin_model)
 
 
 
+# -------------------------------------------------------------------------
+
+dat_sem %>% 
+  select(nmkab, pm20, p1, p2) %>% 
+  pivot_longer(-nmkab) %>% 
+  mutate(
+    pos = rep(c(26, 5, 3), 38),
+    name = factor(name, levels = c('pm20', 'p1', 'p2'))
+  ) %>% 
+  ggplot(aes(x = value, y = nmkab)) +
+  geom_col(width = 0.7, fill = 'steelblue') +
+  geom_text(
+    aes(
+      x = pos,
+      label = paste(scales::comma(value, accuracy = 0.01), '  ')
+    ),
+    fontface = 2,
+    nudge_x = 0,
+    hjust = 0,
+    size = 3
+  ) +
+  scale_y_discrete(
+    labels = function(x) ifelse(
+      str_detect(x, 'Kab'),
+      str_remove_all(x, 'Kabupaten '),
+      x
+    )
+  ) +
+  labs(
+    title = 'Indikator Kemiskinan Tahun 2020',
+    subtitle = 'Provinsi Jawa Timur',
+    x = NULL,
+    y = 'Kabupaten/Kota'
+  ) +
+  theme(
+    # panel.background = element_rect(fill = "white", colour = "black")
+  ) +
+  theme_bw() +
+  facet_grid(
+    ~name, scales = 'free_x', 
+    labeller = as_labeller(
+      c(
+        'pm20' = 'Persentase Penduduk Miskin',
+        'p1' = 'Indeks Kedalaman Kemiskinan',
+        'p2' = 'Indeks Keparahan Kemiskinan'
+      )
+    )
+  )
 
 
+ggsave(
+  filename = "E:/Visualisasi/kemiskinan_jatim.png",
+  width = 10,
+  height = 7,
+  units = "in",
+  dpi = 500,
+  scale = 0.85,
+  bg = "white"
+)
 
-
-mat <- matrix(sample(1:100, 9), 3, 3)
-X <- mat <- nitip
-
-X <- sweep(X, MARGIN = 2, STATS = colMeans(X), FUN = '-')
-X <- sweep(X, MARGIN = 1, STATS = rowMeans(X), FUN = '-')
-
-
-# dikurangi average row
-X <- sweep(X, MARGIN = 1, STATS = X[, ncol(X)], FUN = '-')
-# dikurangi average col
-X <- sweep(X, MARGIN = 2, STATS = X[nrow(X), ], FUN = '-')
-X
-
-
-nitip <- mat
-for (r in 1:(nrow(mat)-1) ){
-  for (c in 1:(ncol(mat)-1) ) {
-    mat[r,c] <- mat[r,c]-mat[r,3]-mat[3,c]
-  }
-}
-mat
-nitip

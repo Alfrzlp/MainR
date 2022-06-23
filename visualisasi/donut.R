@@ -43,10 +43,13 @@ df_bpum %>%
             position = position_stack(vjust = 0.5)) +
   coord_polar(theta = "y") +
   xlim(c(1, hsize + 0.5)) +
-  scale_fill_manual(values = c("#67CFC5", "#D9B05E")) +
+  scale_fill_manual(
+    values = c("#67CFC5", "#D9B05E"),
+    labels = c('Non BPUM recipient', 'BPUM recipient')
+  ) +
   scale_y_continuous(expand = c(0, 0)) +
   labs(
-    title = "Kategori Rumah Tangga Usaha Mikro",
+    title = "Micro-Enterprises Household Category",
     fill = NULL
   ) +
   theme(
@@ -61,10 +64,10 @@ df_bpum %>%
 
 
 ggsave(
-  filename = str_glue("E:/Visualisasi/desil/bpum.png"),
+  filename = str_glue("E:/Visualisasi/pie chart/bpum.png"),
   width = 10,
   height = 5,
-  units = "in", dpi = 300,
+  units = "in", dpi = 500,
   scale = 0.7, bg = 'white'
 )
 
@@ -96,10 +99,17 @@ df_sk %>%
   xlim(c(1.7, hsize + 0.5)) +
   scale_y_continuous(expand = c(0, 0)) +
   labs(
-    title = "Status Kemiskinan",
+    title = "Poverty Status",
     fill = NULL
   ) +
-  scale_fill_brewer(palette = 'Oranges', direction = -1) +
+  scale_fill_brewer(
+    palette = 'Oranges', direction = -1,
+    labels = c('Very Poor',
+               'Poor',
+               'Almost Poor',
+               'Vulnerable to Poor',
+               'Non Poor')
+  ) +
   # scale_fill_manual(values = c("#A10000", "#BF0404", "#E00000", "#FF5454", "#FF7F7F"))+
   theme(
     plot.title = element_text(size = rel(1.3), face = "bold"),
@@ -113,11 +123,18 @@ df_sk %>%
 
 
 ggsave(
-  filename = str_glue("E:/Visualisasi/desil/sk.png"),
+  filename = str_glue("E:/Visualisasi/pie chart/sk.png"),
   width = 10,
   height = 5,
-  units = "in", dpi = 300,
+  units = "in", dpi = 500,
   scale = 0.9, bg = 'white'
 )
+
+
+
+
+
+# -------------------------------------------------------------------------
+
 
 

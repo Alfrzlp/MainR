@@ -80,3 +80,14 @@ colnames(data) <- namakolom
 data <- as.data.frame(data)
 view(data)
 glimpse(data)
+
+
+
+# -------------------------------------------------------------------------
+library(rvest)
+read_html("https://stis.ac.id/sipadu/mahasiswa/index.php/skripsi/ajaxJadwalSmSelanjutnya_s/2") %>% {
+  tibble(
+    key = html_nodes(., ".pi-data-label") %>% html_text(),
+    value = html_nodes(., ".pi-item-spacing .pi-font") %>% html_text()
+  )
+}

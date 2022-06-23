@@ -19,9 +19,10 @@ MVN::mvn(iris[, -5])
 # Ho : Matriks Covariance sama
 heplots::boxM(iris[, -5], iris$Species)
 
-# Uji perbedaan vector
+# Uji perbedaan vector rata2
 rrcov::Wilks.test(iris[, -5], grouping = factor(iris$Species))
-# signifikan -> terdapat perbedaan
+# signifikan -> terdapat perbedaan (yang dicari)
+# bisa pakai manova
 
 
 # Model -------------------------------------------------------------------
