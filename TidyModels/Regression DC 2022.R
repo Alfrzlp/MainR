@@ -190,3 +190,50 @@ write.csv(hasil, 'D:/__Datasets/sub.csv', row.names = F, quote = F)
 system(
   'kaggle competitions submit -c 2022-regression-data-challenge -f D:/__Datasets/sub.csv -m "Message"'
 )
+
+
+
+
+
+
+# Interpolation -----------------------------------------------------------
+ggplot(df_train) +
+  geom_point(aes(y = Id, x = score))
+
+ggplot(hasil) +
+  geom_point(aes(y = Id, x = Expected))
+
+preds <- df_train %>% 
+  arrange(Id) %>% {
+    signal::interp1((.)$Id, (.)$score, df_test$Id,
+                    method = 'pc', extrap = T)
+  } 
+
+# "linear", "nearest", "pchip", "cubic", "spline"
+
+
+# -------------------------------------------------------------------------
+hasil <- df_sub %>% 
+  mutate(
+    Expected = round(preds - 1.111, 3)
+  )
+
+hasil %>% is.na() %>% colSums()
+hasil %>% filter(is.na(Expected))
+
+
+write.csv(hasil, 'D:/__Datasets/sub.csv', row.names = F, quote = F)  
+system(
+  'kaggle competitions submit -c 2022-regression-data-challenge -f D:/__Datasets/sub.csv -m "Message"'
+)
+
+
+
+
+
+
+
+
+
+
+
