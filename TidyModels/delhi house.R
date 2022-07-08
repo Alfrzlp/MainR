@@ -67,14 +67,21 @@ val_set <- validation_split(
 )
 val_set
 
+train_fold <- vfold_cv(train_set)
+
+
+
 # Advance Model -----------------------------------------------------------
 model_spec <-
-  rand_forest(mtry = tune(), min_n = tune(), trees = tune()) %>%
+  rand_forest(mtry = tune(), min_n = tune()) %>%
   set_engine('ranger', num.threads = 4) %>%
   set_mode('regression')
 
 model_spec <-
-  boost_tree(tree_depth = tune(), trees = 308, learn_rate = 0.0226132275987791, min_n = tune(), loss_reduction = 7.50463627637477e-09, sample_size = 0.278397969997581, stop_iter = 17) %>%
+  boost_tree(tree_depth = tune(), trees = tune(),
+             learn_rate = tune(), min_n = tune(),
+             loss_reduction = tune(),
+             sample_size = tune(), stop_iter = tune()) %>%
   set_engine('xgboost') %>%
   set_mode('regression')
 
@@ -83,8 +90,9 @@ model_spec <-
 # Workflow ----------------------------------------------------------------
 my_recipe <- 
   recipe(medv ~ ., data = train_set) %>% 
-  # step_rm(id) %>% 
-  step_mutate(river_flg = as.numeric(river_flg)) %>% 
+  step_log(lstat) %>% 
+  step_rm(id) %>% 
+  step_mutate(river_flg = as.numeric(river_flg)) 
   # update_role(Id, new_role = "id") %>% 
   step_YeoJohnson(all_numeric_predictors()) 
   
@@ -100,7 +108,7 @@ my_workflow <-
 my_grid <- 
   crossing(
     mtry = 5:20,
-    min_n = 5:7
+    min_n = 5:20
   )
 
 model_spec %>% extract_parameter_set_dials()
@@ -109,13 +117,13 @@ model_spec %>% extract_parameter_set_dials()
 model_res <- 
   my_workflow %>% 
   tune_grid(
-    val_set,
-    grid = 500,
+    resamples = train_fold,
+    grid = 10,
     control = control_grid(save_pred = TRUE, verbose = T, allow_par = T),
     metrics = reg_metric
   )
 
-model_res$.notes[[1]]$note[1]
+# model_res$.notes[[1]]$note[1]
 
 model_res %>% 
   collect_metrics() %>% 
@@ -174,7 +182,7 @@ preds <- 1 / log10(preds)
 
 # Submission --------------------------------------------------------------
 hasil <- df_sub %>% 
-  mutate(MEDV = preds)
+  mutate(MEDV = preds + 1)
 
 write.csv(hasil, 'D:/__Datasets/sub.csv', row.names = F, quote = F)  
 

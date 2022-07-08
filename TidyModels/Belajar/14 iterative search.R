@@ -69,3 +69,20 @@ svm_bo <-
     iter = 25,
     control = ctrl
   )
+
+
+
+# SIMULATED ANNEALING -----------------------------------------------------
+ctrl_sa <- control_sim_anneal(verbose = TRUE, no_improve = 10L)
+
+set.seed(1404)
+svm_sa <-
+  svm_wflow %>%
+  tune_sim_anneal(
+    resamples = cell_folds,
+    metrics = roc_res,
+    initial = svm_initial,
+    param_info = svm_param,
+    iter = 50,
+    control = ctrl_sa
+  )
