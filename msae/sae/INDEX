@@ -1,0 +1,55 @@
+Xoutsamp                Out-of-sample values of auxiliary variables for
+                        5 domains.
+bxcx                    Box-Cox Transformation and its Inverse
+cornsoybean             Corn and soy beans survey and satellite data in
+                        12 counties in Iowa.
+cornsoybeanmeans        Corn and soy beans mean number of pixels per
+                        segment for 12 counties in Iowa.
+diagonalizematrix       It constructs a block-diagonal matrix.
+direct                  Direct estimators.
+ebBHF                   EB estimators of an indicator with non-sample
+                        values of auxiliary variables.
+eblupBHF                EBLUPs of domain means based on a nested error
+                        linear regression model.
+eblupFH                 EBLUPs based on a Fay-Herriot model.
+eblupSFH                EBLUPs based on a spatial Fay-Herriot model.
+eblupSTFH               EBLUPs based on a spatio-temporal Fay-Herriot
+                        model.
+grapes                  Synthetic data on grape production for the
+                        region of Tuscany.
+grapesprox              Proximity matrix for the spatial Fay-Herriot
+                        model.
+incomedata              Synthetic income data.
+milk                    Data on fresh milk expenditure.
+mseFH                   Mean squared error estimator of the EBLUP under
+                        a Fay-Herriot model.
+mseSFH                  Mean squared error estimator of the spatial
+                        EBLUP under a spatial Fay-Herriot model.
+npbmseSFH               Nonparametric bootstrap mean squared error
+                        estimator of the spatial EBLUPs under a spatial
+                        Fay-Herriot model.
+pbmseBHF                Parametric bootstrap mean squared error
+                        estimators of the EBLUPs of means obtained
+                        under a nested error linear regression model.
+pbmseSFH                Parametric bootstrap mean squared error
+                        estimators of the spatial EBLUPs under a
+                        spatial Fay-Herriot model.
+pbmseSTFH               Parametric bootstrap mean squared error
+                        estimator of a spatio-temporal Fay-Herriot
+                        model.
+pbmseebBHF              Parametric bootstrap mean squared error
+                        estimators of EB estimators.
+pssynt                  Post-stratified synthetic estimators of domain
+                        means.
+sae-package             Small area estimation
+sizeprov                Domain population sizes.
+sizeprovage             Domain population sizes by age.
+sizeprovedu             Domain population sizes by level of education.
+sizeprovlab             Domain population sizes by labor force status.
+sizeprovnat             Domain population sizes for Spanish or non
+                        Spanish nationality.
+spacetime               Synthetic area level data with spatial and
+                        temporal correlation.
+spacetimeprox           Proximity matrix for the spatio-temporal
+                        Fay-Herriot model.
+ssd                     Sample size dependent estimator.

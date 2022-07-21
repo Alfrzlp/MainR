@@ -137,3 +137,15 @@ dat %>%
   colnames() %>% 
   cat
 
+
+
+
+# -------------------------------------------------------------------------
+library(lubridate)
+x <- as.period(as.Date('2020-12-11') %--% as.Date('2022-10-01'), unit = 'year')
+x
+class(x)
+year(x)
+month(x)
+day(x)
+

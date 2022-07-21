@@ -4,12 +4,12 @@ library(tidyverse)
 library(classInt)
 
 # Data --------------------------------------------------------------------
-gab <- st_read('E:/CitraRiset2/gab_rev2.geojson') %>% 
+gab <- st_read('D:/__Datasets/Riset2/gab_rev2.geojson') %>% 
   mutate(nmkec = str_to_title(nmkec)) %>% 
   select(nmkab, nmkec, Y1, X_cen, Y_cen)
 head(gab)
 
-batas_kab <- st_read('E:/CitraRiset2/batas_kabBBPWK.geojson')
+batas_kab <- st_read('D:/__Datasets/Riset2/batas_kabBBPWK.geojson')
 bb <- gab %>% dplyr::filter(nmkab == 'Bandung Barat')
 pwk <- gab %>% dplyr::filter(nmkab == 'Purwakarta')
 
@@ -26,6 +26,18 @@ br_pwk <- classIntervals(pwk$Y1, n = 5, style = 'jenks')$br
 
 br_bb <- c(44.449, 51.534, 64.822, 73.652)
 br_pwk <- c(24.751, 35.505, 41.696, 63.384)
+
+get_labelBr <- function(br){
+  br <- scales::dollar(br, decimal.mark = ',', big.mark = '.', prefix = '')
+  c(
+    str_glue('< {br[1]}'),
+    str_glue('[{br[1]}; {br[2]})'),
+    str_glue('[{br[2]}; {br[3]})'),
+    str_glue('[{br[3]}; {br[4]})'),
+    str_glue('>= {br[4]}')
+  )
+}
+
 get_labelBr(br_bb)
 
 bb <- bb %>% 
@@ -81,7 +93,7 @@ pwk <- pwk %>%
 
 
 # viz pwk ---------------------------------------------------------------------
-
+my_family <- 'poppins'
 ggplot(data = pwk) +
   geom_sf(
     aes(fill = Y1_nb), color = "white",
@@ -100,6 +112,7 @@ ggplot(data = pwk) +
       label = str_wrap(nmkec, 15),
       x = X_cen, y = Y_cen
     ), 
+    family = my_family,
     xlim = c(107, Inf), ylim = c(-Inf, Inf),
     min.segment.length = 0,
     size = 2,
@@ -121,6 +134,7 @@ ggplot(data = pwk) +
       label = str_wrap(nmkec, 15),
       x = X_cen, y = Y_cen
     ), 
+    family = my_family,
     xlim = c(-Inf, 107.9), ylim = c(-Inf, Inf),
     min.segment.length = 0,
     size = 2,
@@ -159,17 +173,25 @@ ggplot(data = pwk) +
     fill = str_wrap('Kelas Laju Alih Fungsi Lahan Natural Break (%)', 25),
     x = 'Longitude', y = 'Latitude'
   ) +
-  theme_bw() +
+  theme_bw(base_family = my_family) +
   theme(
-    plot.title = element_text(face = 2),
-    plot.subtitle = element_text(colour = 'gray30')
+    plot.title = element_text(face = 2, vjust = 0),
+    plot.subtitle = element_text(colour = 'gray30', vjust = 0),
+    axis.text.y = element_text(margin = margin(l = 0))
   ) +
-  coord_sf(xlim = c(106.99, 107.9), ylim = c(-6.33, -6.83))
+  coord_sf(xlim = c(106.99, 107.9), ylim = c(-6.33, -6.83)) +
+  scale_x_continuous(
+    labels = lab_tokomma(seq(107, 107.8, by = 0.2), 'E')
+  ) +
+  scale_y_continuous(
+    labels = lab_tokomma(seq(6.8, 6.4, by = -0.1))
+  )
 
 
 
 ggsave(
-  filename = "E:/Visualisasi/riset/perkab/warna dibalik/pwk.png",
+  # filename = "E:/Visualisasi/riset/perkab/warna dibalik/pwk.png",
+  filename = "E:/Visualisasi/riset/revisi rah/peta/laju_pwk_poppins.png",
   width = 7,
   height = 4,
   units = "in",
@@ -199,6 +221,7 @@ ggplot(data = bb) +
       label = str_wrap(nmkec, 15),
       x = X_cen, y = Y_cen
     ), 
+    family = my_family,
     xlim = c(107, Inf), ylim = c(-Inf, Inf),
     min.segment.length = 0,
     size = 2,
@@ -220,6 +243,7 @@ ggplot(data = bb) +
       label = str_wrap(nmkec, 15),
       x = X_cen, y = Y_cen
     ), 
+    family = my_family,
     xlim = c(-Inf, 107.9), ylim = c(-Inf, Inf),
     min.segment.length = 0,
     size = 2,
@@ -258,17 +282,24 @@ ggplot(data = bb) +
     fill = str_wrap('Kelas Laju Alih Fungsi Lahan Natural Break (%)', 25),
     x = 'Longitude', y = 'Latitude'
   ) +
-  theme_bw() +
+  theme_bw(base_family = my_family) +
   theme(
     plot.title = element_text(face = 2),
     plot.subtitle = element_text(colour = 'gray30')
   ) +
-  coord_sf(xlim = c(106.99, 107.9), ylim = c(-6.65, -7.15))
+  coord_sf(xlim = c(106.99, 107.9), ylim = c(-6.65, -7.15)) +
+  scale_x_continuous(
+    labels = lab_tokomma(seq(107, 107.8, by = 0.2), 'E')
+  ) +
+  scale_y_continuous(
+    labels = lab_tokomma(seq(7.1, 6.7, by = -0.1))
+  )
 
 
 
 ggsave(
-  filename = "E:/Visualisasi/riset/perkab/warna dibalik/bb.png",
+  # filename = "E:/Visualisasi/riset/perkab/warna dibalik/bb.png",
+  filename = 'E:/Visualisasi/riset/revisi rah/peta/laju_bb_tnr.png',
   width = 7,
   height = 4,
   units = "in",
@@ -277,7 +308,7 @@ ggsave(
   bg = "white"
 )
 
-
+#
 
 # Void --------------------------------------------------------------------
 ggplot(data = bb) +

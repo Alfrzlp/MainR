@@ -1,5 +1,6 @@
 if (interactive()) {
   cat("\014")
+  options(tidymodels.dark = TRUE)
   extrafont::loadfonts(device = "win")
   # suppressMessages(suppressWarnings(require(tidyverse)))
   

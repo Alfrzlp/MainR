@@ -27,21 +27,22 @@ dat1
 
 dat1 %>%
   mutate(
-    ypos = cumsum(persentase) - 0.5 * persentase
+    ypos = cumsum(persentase) - 0.45 * persentase
   ) %>%
   ggplot(aes(x = "", y = persentase, fill = rev(kat))) +
   geom_bar(stat = "identity", width = 1, color = "white") +
   geom_text(
-    aes(y = ypos, label = scales::percent(persentase/100)),
+    aes(y = ypos, 
+        label = scales::percent(persentase/100, decimal.mark = ',')),
     color = "white", size = 4.5,
     fontface = 2
   ) +
-  coord_polar("y", start = 0) +
+  coord_polar("y", start = -30) +
   scale_fill_manual(
-    values = (my_col[1:3]),
+    values = rev(my_col[1:3]),
     labels = function(x) rev(str_wrap(x, 19))
   ) +
-  theme_void(base_size = 13) +
+  theme_void(base_size = 13, base_family = 'tnr') +
   theme(
     plot.title = element_text(face = 2),
     plot.subtitle = element_text(colour = 'gray30'),
@@ -63,7 +64,7 @@ dat1 %>%
 
 
 ggsave(
-  filename = 'E:/Visualisasi/riset/Revisi 5 Mei/1_2.png',
+  filename = 'E:/Visualisasi/riset/revisi rah/1_2.png',
   width = 10,
   height = 6,
   units = "in",
@@ -75,17 +76,15 @@ ggsave(
 
 
 # 1.7 ---------------------------------------------------------------------
-s2 <- 'Melalui Transaksi Penjualan	23	21.30	52	48.15	33	30.56
-Tidak Melalui Transaksi Penjualan	34	18.38	103	55.68	48	25.95'
+s2 <- 'Melalui Transaksi Penjualan 21.30 52 48.15 33 30.56
+Tidak Melalui Transaksi Penjualan 18.38 103 55.68 48 25.95'
+s2
 
-dat2 <- read_pattern(
-    s2, pos_non_angka = 1,
-    pos_angka = 2:7
-  ) %>%
-  mutate(
-    .before = v1
-  ) %>%
-  dplyr::select(c(mekanisme = v1,  v3, v5, v7)) %>%
+dat2 <- dm::read_pattern(
+  s2, pos_non_angka = 1,
+  pos_angka = 2:6
+) %>% 
+  dplyr::select(c(mekanisme = v1,  v2, v4, v6)) %>%
   # separator_convert(vars(v3, v5, v7))
   setNames(
     c('mekanisme', jrt_lvl)
@@ -107,13 +106,15 @@ ggplot(dat2, aes(y = persentase, x = kat, fill = mekanisme, group = mekanisme)) 
     position = position_dodge2(0.9)
   ) +
   geom_text(
-    aes(y = persentase + 3, label = scales::percent(persentase/100)),
+    aes(y = persentase + 3, 
+        label = scales::percent(persentase/100, decimal.mark = ',', accuracy = 0.01)),
     position = position_dodge(0.9),
-    size = 3.9
+    size = 3.9,
+    family = 'tnr'
   ) +
   scale_fill_manual(
     NULL,
-    values =  c(my_col[1:2], my_col[1:2]),
+    values =  c(my_col[2:1], my_col[2:1]),
     labels = function(x) str_wrap(x, 20)
   ) +
   scale_y_continuous(
@@ -121,7 +122,7 @@ ggplot(dat2, aes(y = persentase, x = kat, fill = mekanisme, group = mekanisme)) 
     expand = expansion(mult = c(0.01, 0.1))
   ) +
   scale_x_discrete(
-    expand = expansion(mult = c(0.01, 0.1)),
+    expand = expansion(mult = c(0.1, 0.1)),
     labels = function(x) str_wrap(x, 10)
   ) +
   # facet_grid(
@@ -133,23 +134,19 @@ ggplot(dat2, aes(y = persentase, x = kat, fill = mekanisme, group = mekanisme)) 
     subtitle = 'Kabupaten Bandung Barat dan Kabupaten Purwakarta',
     title = str_wrap('Persentase (%) Mekanisme Alih Fungsi Lahan Menurut Interval Jumlah Anggota Rumah Tangga', 70)
   ) +
-  theme_minimal() +
+  theme_minimal(base_family = "tnr") +
   theme(
-    panel.spacing = unit(2, "lines"),
-    strip.background = element_blank(),
-    strip.placement = "outside",
-    strip.text = element_text(size = 11.5, face = 2, colour = 'gray30', margin = margin(20, 0, 0, 0)),
+    panel.spacing = unit(5, "lines"),
     axis.text.x = element_text(size = 10.5, margin = margin(b = 10, 0, 0, 0)),
     panel.grid = element_blank(),
-    plot.title = element_text(face = 2, size = 13),
-    plot.subtitle = element_text(colour = 'gray30')
+    plot.title = element_text(face = 2, size = 13, vjust = 0),
+    plot.subtitle = element_text(colour = 'gray30', vjust = 0)
   )
 
 
 
-
 ggsave(
-  filename = 'E:/Visualisasi/riset/Revisi 5 Mei/1_7.png',
+  filename = 'E:/Visualisasi/riset/revisi rah/1_7_tnr.png',
   width = 7.5,
   height = 5,
   units = "in",
@@ -215,10 +212,11 @@ dat_harga %>%
       colour = col_text,
       label = ifelse(
         p %in% 1:100,
-        scales::percent(p/100, accuracy = 1),
-        scales::percent(p/100, accuracy = 0.01)
+        scales::percent(p/100, accuracy = 1, decimal.mark = ','),
+        scales::percent(p/100, accuracy = 0.01, decimal.mark = ',')
       )
     ),
+    family = my_family,
     position = position_stack(vjust = 0.5, reverse = F),
     size = 3.5
   ) +
@@ -239,7 +237,7 @@ dat_harga %>%
     subtitle = 'Kabupaten Bandung Barat dan Kabupaten Purwakarta',
     title = expression(bold('Persentase (%) Harga Jual Lahan (ribu per' ~ m^2 ~ ') Menurut Jenis Komoditas'))
   ) +
-  theme_minimal(base_line_size = 0) +
+  theme_minimal(base_line_size = 0, base_family = my_family) +
   theme(
     axis.ticks = element_blank(),
     axis.line = element_blank(),
@@ -250,7 +248,8 @@ dat_harga %>%
     # strip.placement = "outside",
     # strip.text = element_text(size = 11.5, colour = 'gray30', face = 2),
     axis.text.y = element_text(size = 11),
-    plot.subtitle = element_text(colour = 'gray30'),
+    plot.title = element_text(vjust = 0),
+    plot.subtitle = element_text(colour = 'gray30', vjust = 0),
     legend.text = element_text(size = 9.5),
     legend.spacing.y = unit(0.1, 'cm')
   ) +
@@ -263,7 +262,8 @@ dat_harga %>%
 
 
 ggsave(
-  filename = 'E:/Visualisasi/riset/Revisi 5 Juni/1_18.png',
+  # filename = 'E:/Visualisasi/riset/Revisi 5 Juni/1_18.png',
+  filename = 'E:/Visualisasi/riset/revisi rah/1_18_tnr_koma.png',
   width = 10.5,
   height = 5,
   units = "in",

@@ -112,6 +112,7 @@ registerDoParallel(cl)
 grid_results <-
   my_workflow %>%
   workflow_map(
+    "tune_race_anova",
     seed = 1,
     resamples = train_fold,
     grid = 25,

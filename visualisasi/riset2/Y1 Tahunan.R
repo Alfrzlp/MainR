@@ -63,17 +63,32 @@ my_col <- c('#b36d17', '#e1c27b', '#F6E8C1', "#7ccdc1", "#2f9790")
 my_col_lisa <- c('gray70', 'tomato', 'skyblue3', 'orange', 'steelblue', 'black', 'black')
 
 # Data --------------------------------------------------------------------
-gab <- st_read('E:/CitraRiset2/gab_rev2.geojson')
+gab <- st_read('D:/__Datasets/Riset2/gab_rev2.geojson')
 head(gab)
-batas_kab <- st_read('E:/CitraRiset2/batas_kabBBPWK.geojson')
+batas_kab <- st_read('D:/__Datasets/Riset2/batas_kabBBPWK.geojson')
 
-dat <- readxl::read_xlsx('E:/CitraRiset2/dat_moran.xlsx')
+dat <- readxl::read_xlsx('D:/__Datasets/Riset2/dat_moran.xlsx')
 dat
 
 
 # Peta Tematik ------------------------------------------------------------
+brTahunan <- c(4.438, 5.556, 7.352, 8.302)
+label_brThn <- get_labelBr(brTahunan)
 
+gab <- gab %>% 
+  mutate(
+    Y1_tahunan = round(y1_tahunan, 3),
+    Y1_thn_nb = case_when(
+      y1_tahunan < brTahunan[1] ~ 1,
+      y1_tahunan >= brTahunan[1] & y1_tahunan < brTahunan[2] ~ 2,
+      y1_tahunan >= brTahunan[2] & y1_tahunan < brTahunan[3] ~ 3,
+      y1_tahunan >= brTahunan[3] & y1_tahunan < brTahunan[4] ~ 4,
+      y1_tahunan >= brTahunan[4] ~ 5
+    ),
+    Y1_thn_nb = factor(Y1_thn_nb, levels = 1:5, labels = label_brThn)
+  )
 
+my_family <- 'tnr'
 ggplot(data = gab) +
   geom_sf(
     aes(fill = Y1_thn_nb), color = "white",
@@ -92,6 +107,7 @@ ggplot(data = gab) +
       label = str_wrap(nmkec, 15),
       x = X_cen, y = Y_cen
     ),
+    family = my_family,
     xlim = c(107, Inf), ylim = c(-Inf, Inf),
     min.segment.length = 0,
     size = 2,
@@ -113,6 +129,7 @@ ggplot(data = gab) +
       label = str_wrap(nmkec, 15),
       x = X_cen, y = Y_cen
     ),
+    family = my_family,
     xlim = c(-Inf, 107.9), ylim = c(-Inf, Inf),
     min.segment.length = 0,
     size = 2,
@@ -152,17 +169,25 @@ ggplot(data = gab) +
     fill = str_wrap('Kelas Persentase Laju Alih Fungsi Lahan Sawah Tahunan Natural Break (%)', 25),
     x = 'Longitude', y = 'Latitude'
   ) +
-  theme_bw() +
+  theme_bw(base_family = my_family) +
   theme(
-    plot.title = element_text(face = 2),
-    plot.subtitle = element_text(colour = 'gray30')
+    plot.title = element_text(face = 2, vjust = 0),
+    plot.subtitle = element_text(colour = 'gray30', vjust = 0),
+    axis.text.x = element_text(margin = margin(t = 5)),
+    axis.title.y = element_text(vjust = 0.1)
   ) +
-  coord_sf(xlim = c(106.99, 107.9), ylim = c(-6.3, -7.2))
-
+  coord_sf(xlim = c(106.99, 107.9), ylim = c(-6.3, -7.2)) +
+  scale_x_continuous(
+    labels = lab_tokomma(seq(107, 107.8, by = 0.2), 'E')
+  ) +
+  scale_y_continuous(
+    labels = lab_tokomma(seq(7.2, 6.4, by = -0.2))
+  )
+  
 
 
 ggsave(
-  filename = "E:/Visualisasi/riset/Y1_tahunan/y1_tematik.png",
+  filename = "E:/Visualisasi/riset/revisi rah/peta/y1_tematik_tnr.png",
   width = 7,
   height = 6.5,
   units = "in",
@@ -313,6 +338,7 @@ ggplot(data = gab) +
       label = str_wrap(str_to_title(nmkec), 15),
       x = X_cen, y = Y_cen
     ),
+    family = my_family,
     force = 0.5,
     xlim = c(-Inf, Inf), ylim = c(-Inf, Inf),
     min.segment.length = 0,
@@ -338,16 +364,23 @@ ggplot(data = gab) +
     subtitle = 'Kabupaten Bandung Barat dan Kabupaten Purwakarta',
     x = 'Longitude', y = 'Latitude', fill = 'cluster'
   ) +
-  theme_bw() +
+  theme_bw(base_family = my_family) +
   theme(
     plot.title = element_text(face = 2),
     plot.subtitle = element_text(colour = 'gray30')
   ) +
-  coord_sf(xlim = c(107.1, 107.79), ylim = c(-6.39, -7.15))
+  coord_sf(xlim = c(107.1, 107.79), ylim = c(-6.39, -7.15)) +
+  scale_x_continuous(
+    labels = lab_tokomma(seq(107.1, 107.8, by = 0.1), 'E')
+  ) +
+  scale_y_continuous(
+    labels = lab_tokomma(seq(7.1, 6.4, by = -0.1))
+  )
+
 
 
 ggsave(
-  filename = "E:/Visualisasi/riset/Y1_tahunan/y1_LISA.png",
+  filename = "E:/Visualisasi/riset/revisi rah/peta/y1_LISA.png",
   width = 7,
   height = 6.5,
   units = "in",
@@ -362,7 +395,7 @@ ggsave(
 #   openxlsx::write.xlsx('E:/CitraRiset2/dat_moran.xlsx')
 lm(y4 ~ x4, data = dat) %>%
   coef()
-
+dat
 dat %>%
   # ganti ini
   ggplot(aes(x = x4, y = y4)) +
@@ -375,6 +408,7 @@ dat %>%
   geom_text_repel(
     # ganti ini
     aes(color = cluster4, label = str_to_title(nmkec)),
+    family = my_family,
     size = 3,
     min.segment.length = 0,
     seed = 0,
@@ -399,9 +433,9 @@ dat %>%
       "Scatterplot Moran's I Persentase Laju Alih Fungsi Lahan Sawah Tahunan",
       65
     ),
-    subtitle = paste0("Moran's I: ", round(gab_moran4$I, 4))
+    subtitle = paste0("Moran's I: ", str_replace(round(gab_moran4$I, 2), '\\.', ','))
   ) +
-  theme_bw(base_family = 'Arial') +
+  theme_bw(base_family = my_family) +
   theme(
     legend.position = "none",
     plot.title = element_text(face = 2),
@@ -414,7 +448,7 @@ dat %>%
 
 
 ggsave(
-  filename = "E:/Visualisasi/riset/Y1_tahunan/y1_moran_.png",
+  filename = "E:/Visualisasi/riset/revisi rah/peta/y1_moran_2.png",
   width = 7,
   height = 6.5,
   units = "in",

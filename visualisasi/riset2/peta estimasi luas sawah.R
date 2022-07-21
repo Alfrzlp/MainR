@@ -1,12 +1,16 @@
 library(sf)
 library(classInt)
 library(ggrepel)
+library(tidyverse)
 
 my_col <- c('#006D2C', '#20AC4B', '#7AC27F', '#A4D29F','#CFE6CA')
-
+windowsFonts(
+  tnr = windowsFont("Times New Roman"),
+  poppins = windowsFont("Poppins")
+)
 # Data --------------------------------------------------------------------
-bb_shape <- st_read("E:/CitraRiset2/bb_LajuLuas.geojson")
-pwk_shape <- st_read("E:/CitraRiset2/pwk_LajuLuas.geojson")
+bb_shape <- st_read("D:/__Datasets/Riset2/bb_LajuLuas.geojson")
+pwk_shape <- st_read("D:/__Datasets/Riset2/pwk_LajuLuas.geojson")
 
 
 
@@ -18,13 +22,16 @@ bb_shape <- bb_shape %>%
     ls = cut(estimasi_luas, breaks = brLS_bb, include.lowest = TRUE)
   )
 
-label_br <- c(
-  str_glue('[{brLS_bb[1]}, {brLS_bb[2]}]'),
-  str_glue('({brLS_bb[2]}, {brLS_bb[3]}]'),
-  str_glue('({brLS_bb[3]}, {brLS_bb[4]}]'),
-  str_glue('({brLS_bb[4]}, {brLS_bb[5]}]'),
-  str_glue('({brLS_bb[5]}, {brLS_bb[6]}]')
+brLS_bb <- scales::dollar(brLS_bb, decimal.mark = ',', big.mark = '.', prefix = '')
+label_brBB <- c(
+  str_glue('[{brLS_bb[1]}; {brLS_bb[2]}]'),
+  str_glue('({brLS_bb[2]}; {brLS_bb[3]}]'),
+  str_glue('({brLS_bb[3]}; {brLS_bb[4]}]'),
+  str_glue('({brLS_bb[4]}; {brLS_bb[5]}]'),
+  str_glue('({brLS_bb[5]}; {brLS_bb[6]}]')
 )
+
+label_brBB
 
 
 # Centroid ----------------------------------------------------------------
@@ -39,6 +46,7 @@ bb_shape$X_cen <- cent$X
 bb_shape$Y_cen <- cent$Y
 
 
+my_family <- 'tnr'
 
 ggplot(data = bb_shape) +
   geom_sf(
@@ -51,6 +59,7 @@ ggplot(data = bb_shape) +
       label = str_wrap(nmkec, 15),
       x = X_cen, y = Y_cen
     ), 
+    family = my_family,
     xlim = c(107, Inf), ylim = c(-Inf, Inf),
     min.segment.length = 0,
     size = 2,
@@ -72,6 +81,7 @@ ggplot(data = bb_shape) +
       label = str_wrap(nmkec, 15),
       x = X_cen, y = Y_cen
     ), 
+    family = my_family,
     xlim = c(-Inf, 107.9), ylim = c(-Inf, Inf),
     min.segment.length = 0,
     size = 2,
@@ -96,7 +106,7 @@ ggplot(data = bb_shape) +
   ) +
   scale_fill_manual(
     values = rev(my_col),
-    labels = label_br
+    labels = label_brBB
   ) +
   labs(
     fill = 'Luas (Ha)', 
@@ -104,18 +114,33 @@ ggplot(data = bb_shape) +
     subtitle = 'Kabupaten Bandung Barat',
     x = 'Longitude', y = 'Latitude'
   ) +
-  theme_minimal(base_family = 'Arial', base_size = 11) +
+  theme_minimal(base_family = my_family, base_size = 11) +
   theme(
-    plot.title = element_text(face = 'bold'),
-    plot.subtitle = element_text(colour = 'gray30')
+    plot.title = element_text(face = 'bold', vjust = 0),
+    plot.subtitle = element_text(colour = 'gray30', vjust = 0)
   ) +
-  coord_sf(xlim = c(106.99, 107.91), ylim = c(-6.6, -7.2))
+  coord_sf(xlim = c(106.99, 107.91), ylim = c(-6.6, -7.2)) +
+  scale_x_continuous(
+    labels = lab_tokomma(seq(107, 107.8, by = 0.2), 'E')
+  ) +
+  scale_y_continuous(
+    labels = lab_tokomma(seq(7.2, 6.6, by = -0.1))
+  )
 
 
 
+lab_tokomma <- function(y_lab, arah = 'S'){
+  y_lab <- str_replace_all(y_lab, '\\.', ',')
+  y_lab <- str_glue('{y_lab}°{arah}')
+  return(y_lab)
+}
+
+lab_tokomma(seq(6.6, 7.2, by = 0.1))
+lab_tokomma(seq(107, 107.8, by = 0.2), 'E')
 
 ggsave(
-  filename = "E:/Visualisasi/riset/estimasi_luas_bb.png",
+  # filename = "E:/Visualisasi/riset/estimasi_luas_bb.png",
+  filename = "E:/Visualisasi/riset/revisi rah/peta/estimasi_luas_bb_poppins.png",
   width = 7,
   height = 5,
   units = "in",
@@ -137,14 +162,17 @@ pwk_shape <- pwk_shape %>%
     ls = cut(estimasi_luas, breaks = brLS_pwk, include.lowest = TRUE)
   )
 
+brLS_pwk <- scales::dollar(brLS_pwk, decimal.mark = ',', big.mark = '.', prefix = '')
+
 label_br <- c(
-  str_glue('[{brLS_pwk[1]}, {brLS_pwk[2]}]'),
-  str_glue('({brLS_pwk[2]}, {brLS_pwk[3]}]'),
-  str_glue('({brLS_pwk[3]}, {brLS_pwk[4]}]'),
-  str_glue('({brLS_pwk[4]}, {brLS_pwk[5]}]'),
-  str_glue('({brLS_pwk[5]}, {brLS_pwk[6]}]')
+  str_glue('[{brLS_pwk[1]}; {brLS_pwk[2]}]'),
+  str_glue('({brLS_pwk[2]}; {brLS_pwk[3]}]'),
+  str_glue('({brLS_pwk[3]}; {brLS_pwk[4]}]'),
+  str_glue('({brLS_pwk[4]}; {brLS_pwk[5]}]'),
+  str_glue('({brLS_pwk[5]}; {brLS_pwk[6]}]')
 )
 
+label_br
 
 # Centroid ----------------------------------------------------------------
 cent <- 
@@ -158,7 +186,7 @@ pwk_shape$X_cen <- cent$X
 pwk_shape$Y_cen <- cent$Y
 
 
-
+my_family <- 'poppins'
 ggplot(data = pwk_shape) +
   geom_sf(
     aes(fill = ls), color = "white",
@@ -170,6 +198,7 @@ ggplot(data = pwk_shape) +
       label = str_wrap(nmkec, 15),
       x = X_cen, y = Y_cen
     ), 
+    family = my_family,
     xlim = c(107, Inf), ylim = c(-Inf, Inf),
     min.segment.length = 0,
     size = 2,
@@ -191,6 +220,7 @@ ggplot(data = pwk_shape) +
       label = str_wrap(nmkec, 15),
       x = X_cen, y = Y_cen
     ), 
+    family = my_family,
     xlim = c(-Inf, 107.9), ylim = c(-Inf, Inf),
     min.segment.length = 0,
     size = 2,
@@ -224,19 +254,25 @@ ggplot(data = pwk_shape) +
     subtitle = 'Kabupaten Purwakarta',
     x = 'Longitude', y = 'Latitude'
   ) +
-  theme_minimal(base_family = 'Arial', base_size = 11) +
+  theme_minimal(base_family = my_family, base_size = 11) +
   theme(
-    plot.title = element_text(face = 'bold'),
-    plot.subtitle = element_text(colour = 'gray30')
+    plot.title = element_text(face = 'bold', vjust = 0),
+    plot.subtitle = element_text(colour = 'gray30', vjust = 0)
     # legend.title = element_text(size = 10)
   ) +
-  coord_sf(xlim = c(106.99, 107.91), ylim = c(-6.3, -6.95))
+  coord_sf(xlim = c(106.99, 107.91), ylim = c(-6.3, -6.95)) +
+  scale_x_continuous(
+    labels = lab_tokomma(seq(107, 107.8, by = 0.2), 'E')
+  ) +
+  scale_y_continuous(
+    labels = lab_tokomma(seq(6.9, 6.3, by = -0.1))
+  )
 
 
 
 
 ggsave(
-  filename = "E:/Visualisasi/riset/estimasi_luas_pwk.png",
+  filename = "E:/Visualisasi/riset/revisi rah/peta/estimasi_luas_pwk_poppins.png",
   width = 7,
   height = 5,
   units = "in",
@@ -244,7 +280,7 @@ ggsave(
   scale = 1,
   bg = "white"
 )
-
+#
 
 
 # void --------------------------------------------------------------------
