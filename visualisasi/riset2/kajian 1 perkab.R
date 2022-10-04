@@ -3,6 +3,17 @@ library(ggrepel)
 library(tidyverse)
 library(classInt)
 
+windowsFonts(
+  poppins = windowsFont('poppins'),
+  tnr = windowsFont('Times New Roman')
+)
+lab_tokomma <- function(y_lab, arah = 'S'){
+  y_lab <- str_replace_all(y_lab, '\\.', ',')
+  y_lab <- str_glue('{y_lab}°{arah}')
+  return(y_lab)
+}
+
+
 # Data --------------------------------------------------------------------
 gab <- st_read('D:/__Datasets/Riset2/gab_rev2.geojson') %>% 
   mutate(nmkec = str_to_title(nmkec)) %>% 
@@ -13,13 +24,18 @@ batas_kab <- st_read('D:/__Datasets/Riset2/batas_kabBBPWK.geojson')
 bb <- gab %>% dplyr::filter(nmkab == 'Bandung Barat')
 pwk <- gab %>% dplyr::filter(nmkab == 'Purwakarta')
 
-st_write(bb, 'E:/peta/bb.geojson')
-st_write(pwk, 'E:/peta/pwk.geojson')
+# st_write(bb, 'E:/peta/bb.geojson')
+# st_write(pwk, 'E:/peta/pwk.geojson')
 
 # color -------------------------------------------------------------------
 my_col_green <- c('#006D2C', '#20AC4B', '#7AC27F', '#A4D29F','#CFE6CA')
+my_col <- c('#8b510a', '#e1c27b', '#F6E8C1', "#7ccdc1", "#2f9790")
+my_col2 <- c('#20AC4B', '#7AC27F', '#FFFFB5', "#FFBC80", "#E40017")
 
-
+# my_col2 <- c('#20AC4B', '#7AC27F', '#FFFFB5', "#f5ab73", "#E40017")
+my_col2 <- c('#20AC4B', '#A4D29F', '#FFFFB5', "#f7a05e", "#E40017")
+my_col2 <- rev(my_col2)
+# 
 # Natural Breaks ----------------------------------------------------------
 br_bb <- classIntervals(bb$Y1, n = 5, style = 'jenks')$br
 br_pwk <- classIntervals(pwk$Y1, n = 5, style = 'jenks')$br
@@ -93,7 +109,7 @@ pwk <- pwk %>%
 
 
 # viz pwk ---------------------------------------------------------------------
-my_family <- 'poppins'
+my_family <- 'tnr'
 ggplot(data = pwk) +
   geom_sf(
     aes(fill = Y1_nb), color = "white",
@@ -160,7 +176,7 @@ ggplot(data = pwk) +
     size = 0.7
   ) +
   scale_fill_manual(
-    values = rev(my_col_green)
+    values = rev(my_col2)[1:3]
   ) +
   # scale_fill_brewer(
   #   palette = 'RdYlGn',
@@ -191,7 +207,7 @@ ggplot(data = pwk) +
 
 ggsave(
   # filename = "E:/Visualisasi/riset/perkab/warna dibalik/pwk.png",
-  filename = "E:/Visualisasi/riset/revisi rah/peta/laju_pwk_poppins.png",
+  filename = "E:/Visualisasi/riset/revisi rah/peta/new/laju_pwk_tnr.png",
   width = 7,
   height = 4,
   units = "in",
@@ -269,7 +285,7 @@ ggplot(data = bb) +
     size = 0.7
   ) +
   scale_fill_manual(
-    values = rev(my_col_green)
+    values = rev(my_col2)
   ) +
   # scale_fill_brewer(
   #   palette = 'RdYlGn',
@@ -299,7 +315,7 @@ ggplot(data = bb) +
 
 ggsave(
   # filename = "E:/Visualisasi/riset/perkab/warna dibalik/bb.png",
-  filename = 'E:/Visualisasi/riset/revisi rah/peta/laju_bb_tnr.png',
+  filename = 'E:/Visualisasi/riset/revisi rah/peta/new/laju_bb_tnr.png',
   width = 7,
   height = 4,
   units = "in",

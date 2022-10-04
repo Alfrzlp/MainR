@@ -5,7 +5,7 @@ if (interactive()) {
   # suppressMessages(suppressWarnings(require(tidyverse)))
   
   jam <- as.numeric(format(Sys.time(), '%H'))
-  salam <- cut(jam, breaks =  c(1, 10, 15, 16, 18), labels = c('Pagi', 'Siang', 'Sore', 'Malam'))
+  salam <- cut(jam, breaks =  c(1, 10, 15, 16, 24), labels = c('Pagi', 'Siang', 'Sore', 'Malam'))
   # lime <- make_style(rgb(94, 201, 98, maxColorValue = 255), bg = F)
   options(prompt = '~> ')
   
@@ -16,7 +16,7 @@ if (interactive()) {
     )
   )
   
-  cli::cli_h1('Selamat {salam} Ridson')
+  cli::cli_h1('Selamat {salam} Sayang')
   cli::cli_alert_success('{.bold Tidyverse} : Sudah diload')
   cli::cli_alert_success('{.emph  Selamat Beraktivitas...}')
   cli::cli_blockquote('Jangan malas', citation = 'Ridson')

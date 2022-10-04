@@ -5,7 +5,10 @@ random_forest <- function(frml, data, ntree = 500,
                           ),
                           replace = TRUE,
                           sample_size = ifelse(replace, nrow(data), ceiling(.632 * nrow(data))),
-                          max_depth = 3, min_n = 20, min_ig = 1e-3, metric_func = "gini impurity") {
+                          max_depth = 3, min_samples_split = 20,
+                          min_samples_leaf = 10, min_ig = 1e-3,
+                          metric_func = "gini",
+                          method = 'lm') {
 
   # -----
   dat <- model.frame(frml, data)
@@ -20,10 +23,11 @@ random_forest <- function(frml, data, ntree = 500,
       data = dat_sub,
       metric_func = metric_func,
       max_depth = max_depth,
-      min_n = min_n,
+      min_samples_split = min_samples_split,
+      min_samples_leaf = min_samples_leaf,
       min_ig = min_ig
     )
-    preds <- predict(res, newdata = dat)
+    preds <- predict(res, newdata = test, method = method)
     return(list(res = res, preds = preds))
   })
 
@@ -56,7 +60,7 @@ random_forest <- function(frml, data, ntree = 500,
 # klasifikasi -------------------------------------------------------------
 iris <- iris %>% janitor::clean_names()
 
-res_ <- random_forest(species ~ ., data = iris, min_n = 15)
+res_ <- random_forest(species ~ ., data = iris, min_samples_leaf = 15)
 res_rf <- randomForest::randomForest(species ~ ., data = iris, nodesize = 15)         
 res_ranger <- ranger::ranger(species ~ ., data = iris, min.node.size = 15)
 
@@ -70,7 +74,7 @@ table(iris$species, res_ranger$predictions)
 # test --------------------------------------------------------------------
 tooth <- ToothGrowth %>% janitor::clean_names()
 
-res_ <- random_forest(len ~ ., data = tooth, min_n = 1)
+res_ <- random_forest(len ~ ., data = tooth, min_samples_leaf = 1)
 res_rf <- randomForest::randomForest(len ~ ., data = tooth)         
 res_ranger <- ranger::ranger(len ~ ., data = tooth)
 

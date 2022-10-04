@@ -251,7 +251,7 @@ predict.DecisionTree <- function(model, newdata, handle_na = F) {
 
 
 # helper ------------------------------------------------------------------
-.change_name <- function(result) {
+.change_name <- function(result, decimal = 3) {
   idx_left <- which.max(names(result) == "left")
   idx_right <- which.max(names(result) == "right")
 

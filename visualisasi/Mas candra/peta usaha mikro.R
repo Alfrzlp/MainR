@@ -14,7 +14,7 @@ jum <-
   tidyr::drop_na()
 
 
-indo <- st_read('D:/__SEMESTER 6/SIG/Data Praktikum/Data Administrasi', 'Administrasi_Provinsi')
+indo <- st_read('D:/__Datasets/Peta/Data Administrasi', 'Administrasi_Provinsi')
 indo <- indo %>% 
   mutate(PROVINSI = if_else(PROVINSI == 'DAERAH ISTIMEWA YOGYAKARTA', 'DI YOGYAKARTA', PROVINSI)) %>% 
   left_join(jum, by = c('PROVINSI' = 'nama_provinsi'))
@@ -40,8 +40,8 @@ ggplot(indo) +
   geom_sf(aes(fill = jumlah_usaha_mikro), color = 'white') +
   theme_void() +
   labs(
-    title = '   Persebaran Rumah Tangga Usaha Mikro di Indonesia',
-    fill = 'Jumlah Rumah Tangga Usaha Mikro',
+    # title = '   Persebaran Rumah Tangga Usaha Mikro di Indonesia',
+    fill = 'Jumlah Sampel Rumah Tangga Usaha Mikro',
     x = NULL, y = NULL
   ) +
   scale_fill_gradientn(colours = c("lightskyblue3", "dodgerblue3", "dodgerblue4")) +
@@ -65,10 +65,10 @@ ggplot(indo) +
 
 
 ggsave(
-  filename = "E:/Visualisasi/rev/peta_RTusahamikro_nobase.png",
+  filename = "E:/Visualisasi/rev sidang/peta.png",
   width = 10,
   height = 5,
-  dpi = 300,
+  dpi = 500,
   bg = 'white',
   type = "cairo-png"
 )
